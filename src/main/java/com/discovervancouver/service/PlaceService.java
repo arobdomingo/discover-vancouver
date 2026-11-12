@@ -3,6 +3,9 @@ package com.discovervancouver.service;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.geo.Distance;
+import org.springframework.data.geo.Metrics;
+import org.springframework.data.mongodb.core.geo.GeoJsonPoint;
 import org.springframework.stereotype.Service;
 import com.discovervancouver.model.Place;
 import com.discovervancouver.repository.PlaceRepository;
@@ -21,6 +24,20 @@ public class PlaceService {
             return placeRepository.findAll();
         }
         return placeRepository.findByCategoryIgnoreCase(category);
+    }
+
+    public List<Place> getPlacesNear(
+        double latitude,
+        double longitude,
+        int maximumDistanceMeters
+    ) {
+        GeoJsonPoint origin = new GeoJsonPoint(longitude, latitude);
+        Distance radius = new Distance(
+            maximumDistanceMeters / 1_000.0,
+            Metrics.KILOMETERS
+        );
+
+        return placeRepository.findByLocationNear(origin, radius);
     }
     
     public Optional<Place> getPlaceById(String placeId){

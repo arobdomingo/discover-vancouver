@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 public class DistanceService {
 
     private static final double Earth_RADIUS_METERS = 6_371_000;
+    private static final int AVERAGE_WALKING_METERS_PER_MINUTE = 80;
 
     public int distanceMeters(double fromLat, double fromLng, double toLat, double toLng){
         double fromLatRadians = Math.toRadians(fromLat);
@@ -25,8 +26,17 @@ public class DistanceService {
     }
 
     public int walkingMinutes(int distanceMeters) {
-        int averageWalkingMetersPerMinute = 80;
-        return Math.max(1, (int) Math.ceil((double) distanceMeters / averageWalkingMetersPerMinute));
+        return Math.max(
+            1,
+            (int) Math.ceil(
+                (double) distanceMeters
+                    / AVERAGE_WALKING_METERS_PER_MINUTE
+            )
+        );
+    }
+
+    public int maximumWalkingDistanceMeters(int walkingMinutes) {
+        return walkingMinutes * AVERAGE_WALKING_METERS_PER_MINUTE;
     }
     
 }

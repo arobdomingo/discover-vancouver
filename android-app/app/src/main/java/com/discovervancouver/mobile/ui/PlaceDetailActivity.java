@@ -10,6 +10,8 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.discovervancouver.mobile.R;
+import com.discovervancouver.mobile.BuildConfig;
+import com.discovervancouver.mobile.api.FeedbackReporter;
 import com.discovervancouver.mobile.data.PreferencesStore;
 import com.discovervancouver.mobile.model.Recommendation;
 import com.google.android.material.button.MaterialButton;
@@ -33,6 +35,11 @@ public final class PlaceDetailActivity extends AppCompatActivity {
             return;
         }
 
+        reportFeedback(
+            recommendation,
+            FeedbackReporter.EventType.RECOMMENDATION_VIEWED
+        );
+
         MaterialButton backButton = findViewById(R.id.backButton);
         MaterialButton mapsButton = findViewById(R.id.mapsButton);
         MaterialButton favouriteButton = findViewById(R.id.favouriteButton);
@@ -53,6 +60,12 @@ public final class PlaceDetailActivity extends AppCompatActivity {
         favouriteButton.setOnClickListener(view -> {
             boolean favourite = preferencesStore.toggleFavourite(
                 recommendation.getPlaceId()
+            );
+            reportFeedback(
+                recommendation,
+                favourite
+                    ? FeedbackReporter.EventType.FAVORITED
+                    : FeedbackReporter.EventType.UNFAVORITED
             );
             updateFavouriteButton(favouriteButton, favourite);
             Toast.makeText(
@@ -82,6 +95,10 @@ public final class PlaceDetailActivity extends AppCompatActivity {
     }
 
     private void openDirections(Recommendation recommendation) {
+        reportFeedback(
+            recommendation,
+            FeedbackReporter.EventType.DIRECTIONS_OPENED
+        );
         Uri directions = Uri.parse(
             "https://www.google.com/maps/dir/?api=1"
         ).buildUpon()
@@ -103,6 +120,17 @@ public final class PlaceDetailActivity extends AppCompatActivity {
                 Toast.LENGTH_LONG
             ).show();
         }
+    }
+
+    private void reportFeedback(
+        Recommendation recommendation,
+        FeedbackReporter.EventType eventType
+    ) {
+        FeedbackReporter.report(
+            BuildConfig.API_BASE_URL,
+            recommendation.getPlaceId(),
+            eventType
+        );
     }
 
     private void updateFavouriteButton(

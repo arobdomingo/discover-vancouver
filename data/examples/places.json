@@ -1,0 +1,15 @@
+[
+  {
+    "sourceId": "example-library-1",
+    "name": "Example Library",
+    "category": "study",
+    "description": "A quiet public study space.",
+    "address": "456 Example Ave, Vancouver, BC",
+    "priceLevel": 0,
+    "indoor": true,
+    "openingHours": {},
+    "latitude": 49.2797,
+    "longitude": -123.1156,
+    "tags": ["quiet", "free", "indoor"]
+  }
+]

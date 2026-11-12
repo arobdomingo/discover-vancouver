@@ -73,7 +73,8 @@ public class RecommendationServiceTest {
             List.of("park", "quiet", "walk", "free", "outdoor")
         );
 
-        when(placeService.getPlaces(null)).thenReturn(List.of(cafe, park));
+        when(placeService.getPlacesNear(49.2827, -123.1207, 1_600))
+            .thenReturn(List.of(cafe, park));
         when(weatherService.getCurrentWeatherResponse(49.2827, -123.1207))
         .thenReturn(new WeatherResponse(12.0, 0.0, 3, false));
 
@@ -127,7 +128,8 @@ public class RecommendationServiceTest {
             List.of("park", "walk", "outdoor", "scenic")
         );
 
-        when(placeService.getPlaces(null)).thenReturn(List.of(nearbyCafe, farPark));
+        when(placeService.getPlacesNear(49.2827, -123.1207, 800))
+            .thenReturn(List.of(nearbyCafe, farPark));
         when(weatherService.getCurrentWeatherResponse(49.2827, -123.1207))
         .thenReturn(new WeatherResponse(12.0, 0.0, 3, false));
 
@@ -175,7 +177,8 @@ public class RecommendationServiceTest {
             List.of("study", "quiet", "free", "rainy-day", "indoor")
         );
 
-        when(placeService.getPlaces(null)).thenReturn(List.of(library));
+        when(placeService.getPlacesNear(49.2827, -123.1207, 1_600))
+            .thenReturn(List.of(library));
         when(weatherService.getCurrentWeatherResponse(49.2827, -123.1207))
         .thenReturn(new WeatherResponse(12.0, 0.0, 3, false));
 
@@ -224,7 +227,8 @@ public class RecommendationServiceTest {
                 List.of("study", "quiet", "free", "rainy-day", "indoor")
         );
     
-        when(placeService.getPlaces(null)).thenReturn(List.of(library));
+        when(placeService.getPlacesNear(49.2827, -123.1207, 1_600))
+            .thenReturn(List.of(library));
         when(weatherService.getCurrentWeatherResponse(49.2827, -123.1207))
         .thenReturn(new WeatherResponse(12.0, 0.0, 3, false));
 
@@ -275,7 +279,8 @@ public class RecommendationServiceTest {
 
         when(weatherService.getCurrentWeatherResponse(49.2827, -123.1207))
         .thenReturn(new WeatherResponse(9.0, 1.2, 61, true));
-        when(placeService.getPlaces(null)).thenReturn(List.of(library));
+        when(placeService.getPlacesNear(49.2827, -123.1207, 1_600))
+            .thenReturn(List.of(library));
 
         RecommendationService recommendationService = new RecommendationService(
             placeService,
@@ -322,7 +327,7 @@ public class RecommendationServiceTest {
             List.of("study", "quiet", "indoor")
         );
 
-        when(placeService.getPlaces(null))
+        when(placeService.getPlacesNear(49.2827, -123.1207, 1_600))
             .thenReturn(List.of(library));
 
         when(weatherService.getCurrentWeatherResponse(49.2827, -123.1207)).thenThrow(
@@ -349,7 +354,7 @@ public class RecommendationServiceTest {
         Place openPlace = testPlace("open", "Open Place", List.of("cafe"));
         Place closedPlace = testPlace("closed", "Closed Place", List.of("cafe"));
 
-        when(placeService.getPlaces(null))
+        when(placeService.getPlacesNear(49.2827, -123.1207, 1_600))
             .thenReturn(List.of(closedPlace, openPlace));
         when(hoursService.isOpenNow(openPlace)).thenReturn(true);
         when(hoursService.isOpenNow(closedPlace)).thenReturn(false);
@@ -390,7 +395,7 @@ public class RecommendationServiceTest {
         Place generalCafe = testPlace("general", "A General Cafe", List.of("cafe"));
         Place morningCafe = testPlace("morning", "Z Morning Cafe", List.of("cafe", "morning"));
 
-        when(placeService.getPlaces(null))
+        when(placeService.getPlacesNear(49.2827, -123.1207, 1_600))
             .thenReturn(List.of(generalCafe, morningCafe));
         when(morningTime.currentTag()).thenReturn("morning");
         when(weatherService.getCurrentWeatherResponse(49.2827, -123.1207))

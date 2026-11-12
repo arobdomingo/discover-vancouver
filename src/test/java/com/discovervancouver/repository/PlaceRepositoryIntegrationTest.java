@@ -69,4 +69,63 @@ class PlaceRepositoryIntegrationTest {
         assertFalse(results.isEmpty());
         assertEquals(savedPlace.getId(), results.get(0).getId());
     }
+
+    @Test
+    void nearbyQueryUsesGeospatialDistance() {
+        Place nearby = testPlace(
+            "nearby",
+            "Nearby Cafe",
+            49.2827,
+            -123.1207
+        );
+        Place farAway = testPlace(
+            "far-away",
+            "Far Away Cafe",
+            49.3043,
+            -123.1443
+        );
+        placeRepository.saveAll(List.of(nearby, farAway));
+
+        List<Place> results = placeRepository.findByLocationNear(
+            new org.springframework.data.mongodb.core.geo.GeoJsonPoint(
+                -123.1207,
+                49.2827
+            ),
+            new org.springframework.data.geo.Distance(
+                1.0,
+                org.springframework.data.geo.Metrics.KILOMETERS
+            )
+        );
+
+        assertEquals(List.of("nearby"), results.stream()
+            .map(Place::getId)
+            .toList());
+    }
+
+    private Place testPlace(
+        String id,
+        String name,
+        double latitude,
+        double longitude
+    ) {
+        return new Place(
+            id,
+            name,
+            "cafe",
+            "A place used by a geospatial integration test.",
+            "123 Test St, Vancouver, BC",
+            1,
+            true,
+            Map.of(
+                DayOfWeek.MONDAY,
+                List.of(new OpeningPeriod(
+                    LocalTime.of(8, 0),
+                    LocalTime.of(18, 0)
+                ))
+            ),
+            latitude,
+            longitude,
+            List.of("coffee")
+        );
+    }
 }

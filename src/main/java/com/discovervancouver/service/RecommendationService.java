@@ -53,7 +53,16 @@ public class RecommendationService {
         boolean rainyWeather = getRainyWeatherOrDefault(latitude, longitude);
         int resultLimit = Math.min(limit, properties.getMaximumLimit());
 
-        return placeService.getPlaces(null).stream()
+        int maximumDistanceMeters =
+            distanceService.maximumWalkingDistanceMeters(
+                maxWalkingMinutes
+            );
+
+        return placeService.getPlacesNear(
+                latitude,
+                longitude,
+                maximumDistanceMeters
+            ).stream()
             .map(place -> createCandidate(place, latitude, longitude))
             .filter(candidate -> candidate.walkingMinutes() <= maxWalkingMinutes)
             .filter(candidate -> !openOnly || candidate.openNow())

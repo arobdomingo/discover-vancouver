@@ -3,7 +3,7 @@
 This module is the native Java client for the Spring Boot backend in the
 repository root.
 
-## Implemented through Milestone 4
+## Implemented
 
 - A discovery form for category, budget, atmosphere, walking range, indoor
   preference, and open-now filtering.
@@ -15,6 +15,8 @@ repository root.
 - Persisted filters and favourite place IDs.
 - Walking directions through the user's available maps or browser app.
 - ViewModel-owned result state that survives activity recreation.
+- Anonymous viewed, favourite, unfavourite, and directions-opened events that
+  fail silently if analytics are unavailable.
 
 The UI does not calculate recommendations. It gathers preferences and displays
 the backend's response. This preserves the architecture from the original plan:
@@ -51,6 +53,7 @@ phone instead needs the Mac's LAN IP in the debug `API_BASE_URL` inside
 - `Recommendation` translates each JSON object into a Java object.
 - `RecommendationAdapter` binds those objects to scrolling result cards.
 - `PlaceDetailActivity` displays the selected result without another request.
+- `FeedbackReporter` sends anonymous product events away from the UI thread.
 
 ## Next Android work
 

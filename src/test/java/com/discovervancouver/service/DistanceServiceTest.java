@@ -22,6 +22,14 @@ public class DistanceServiceTest {
     }
 
     @Test
+    void maximumWalkingDistanceUsesSameWalkingSpeed() {
+        assertEquals(
+            1_600,
+            distanceService.maximumWalkingDistanceMeters(20)
+        );
+    }
+
+    @Test
     void distanceBetweenDowntownPointsIsReasonable(){
         int distance = distanceService.distanceMeters(49.2827, -123.1207, 49.2810, -123.1170);
         assertTrue(distance > 200);

@@ -8,6 +8,7 @@ import java.util.Map;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 
 import com.discovervancouver.model.Place;
 import com.discovervancouver.model.OpeningPeriod;
@@ -17,6 +18,7 @@ import com.discovervancouver.repository.PlaceRepository;
 public class DataSeeder {
     
     @Bean
+    @Order(0)
     CommandLineRunner seedPlaces(PlaceRepository placeRepository){
         return args -> {
             List<Place> seedPlaces = List.of(
@@ -65,6 +67,13 @@ public class DataSeeder {
                 placeRepository.saveAll(seedPlaces);
                 return;
             }
+
+            placeRepository.findAll().stream()
+                .filter(place -> place.getLocation() == null)
+                .forEach(place -> {
+                    place.synchronizeLocation();
+                    placeRepository.save(place);
+                });
 
             seedPlaces.forEach(seedPlace -> placeRepository
                 .findById(seedPlace.getId())

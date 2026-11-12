@@ -1,8 +1,13 @@
 package com.discovervancouver.model;
 
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.geo.GeoJsonPoint;
+import org.springframework.data.mongodb.core.index.GeoSpatialIndexType;
+import org.springframework.data.mongodb.core.index.GeoSpatialIndexed;
+import org.springframework.data.mongodb.core.index.CompoundIndex;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.time.Instant;
 import java.time.DayOfWeek;
 import java.util.List;
 import java.util.Map;
@@ -16,6 +21,11 @@ import jakarta.validation.constraints.NotNull;
 
 
 @Document(collection = "places")
+@CompoundIndex(
+    name = "source_identity",
+    def = "{'source': 1, 'sourceId': 1}",
+    sparse = true
+)
 public class Place {
     
     @Id
@@ -45,6 +55,15 @@ public class Place {
     @DecimalMax("180.0")
     private double longitude;
 
+    @GeoSpatialIndexed(type = GeoSpatialIndexType.GEO_2DSPHERE)
+    private GeoJsonPoint location;
+
+    private String source;
+
+    private String sourceId;
+
+    private Instant importedAt;
+
     @NotNull
     private List<String> tags;
 
@@ -65,6 +84,7 @@ public class Place {
         this.openingHours = openingHours;
         this.latitude = latitude;
         this.longitude = longitude;
+        this.location = new GeoJsonPoint(longitude, latitude);
         this.tags = tags;
     }
 
@@ -106,6 +126,36 @@ public class Place {
     
     public double getLongitude() {
         return longitude;
+    }
+
+    public GeoJsonPoint getLocation() {
+        return location;
+    }
+
+    public void synchronizeLocation() {
+        this.location = new GeoJsonPoint(longitude, latitude);
+    }
+
+    public String getSource() {
+        return source;
+    }
+
+    public String getSourceId() {
+        return sourceId;
+    }
+
+    public Instant getImportedAt() {
+        return importedAt;
+    }
+
+    public void setImportMetadata(
+        String source,
+        String sourceId,
+        Instant importedAt
+    ) {
+        this.source = source;
+        this.sourceId = sourceId;
+        this.importedAt = importedAt;
     }
 
     public List<String> getTags(){

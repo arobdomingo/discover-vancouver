@@ -1,0 +1,2 @@
+sourceId,name,category,description,address,priceLevel,indoor,latitude,longitude,tags
+example-cafe-1,"Example, Cafe",cafe,"A bright cafe for a quiet break.",123 Example St Vancouver BC,1,true,49.2827,-123.1207,quiet|wifi|indoor
