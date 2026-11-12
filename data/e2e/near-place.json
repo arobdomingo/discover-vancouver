@@ -1,0 +1,12 @@
+{
+  "name": "Near Contract Cafe",
+  "category": "contract-test",
+  "description": "Known near end-to-end fixture",
+  "address": "Vancouver, BC",
+  "priceLevel": 1,
+  "latitude": 49.2828,
+  "longitude": -123.1207,
+  "tags": ["contract-test"],
+  "indoor": true,
+  "openingHours": {}
+}

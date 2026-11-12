@@ -1,0 +1,12 @@
+{
+  "name": "Far Contract Cafe",
+  "category": "contract-test",
+  "description": "Known far end-to-end fixture",
+  "address": "Vancouver, BC",
+  "priceLevel": 1,
+  "latitude": 49.2920,
+  "longitude": -123.1207,
+  "tags": ["contract-test"],
+  "indoor": true,
+  "openingHours": {}
+}

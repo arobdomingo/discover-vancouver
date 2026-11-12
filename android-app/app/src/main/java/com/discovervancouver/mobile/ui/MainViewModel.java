@@ -25,7 +25,7 @@ public final class MainViewModel extends ViewModel {
     private double longitude = DEFAULT_LONGITUDE;
     private boolean usingDeviceLocation;
 
-    MainViewModel(RecommendationRepository repository) {
+    public MainViewModel(RecommendationRepository repository) {
         this.repository = repository;
     }
 

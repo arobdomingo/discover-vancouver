@@ -1,6 +1,7 @@
 package com.discovervancouver.mobile.data;
 
 import com.discovervancouver.mobile.api.RecommendationApiClient;
+import com.discovervancouver.mobile.api.RecommendationDataSource;
 import com.discovervancouver.mobile.api.RecommendationQuery;
 import com.discovervancouver.mobile.model.Recommendation;
 
@@ -13,19 +14,23 @@ public final class RecommendationRepository {
         void onError(String message);
     }
 
-    private final RecommendationApiClient apiClient;
+    private final RecommendationDataSource dataSource;
 
     public RecommendationRepository(String baseUrl) {
-        apiClient = new RecommendationApiClient(baseUrl);
+        this(new RecommendationApiClient(baseUrl));
+    }
+
+    public RecommendationRepository(RecommendationDataSource dataSource) {
+        this.dataSource = dataSource;
     }
 
     public void getRecommendations(
         RecommendationQuery query,
         Callback callback
     ) {
-        apiClient.getRecommendations(
+        dataSource.getRecommendations(
             query,
-            new RecommendationApiClient.Callback() {
+            new RecommendationDataSource.Callback() {
                 @Override
                 public void onSuccess(
                     List<Recommendation> recommendations
@@ -42,6 +47,6 @@ public final class RecommendationRepository {
     }
 
     public void close() {
-        apiClient.shutdown();
+        dataSource.close();
     }
 }

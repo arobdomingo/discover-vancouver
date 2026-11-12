@@ -14,6 +14,11 @@ for discovering places around Vancouver.
 - Distance and recommendation service tests.
 - A native Android discovery client with fresh location, persisted preferences,
   favourites, recommendation details, and walking directions.
+- Versioned and rate-limited API endpoints with request IDs, pagination,
+  consistent errors, OpenAPI documentation, health probes, Prometheus metrics,
+  structured production logs, and weather fallback behavior.
+- Automated backend, Android and end-to-end contract tests with CI artifacts,
+  dependency scanning, container builds, and approval-gated releases.
 
 ## Stack
 Java, Spring Boot, Maven, MongoDB, Docker Compose, Android, and Gradle.
@@ -33,7 +38,7 @@ mvn test
 Example request:
 
 ```http
-GET http://localhost:8080/api/recommendations?lat=49.2827&lng=-123.1207&maxWalkingMinutes=20
+GET http://localhost:8080/api/v1/recommendations?lat=49.2827&lng=-123.1207&maxWalkingMinutes=20
 ```
 
 Import the example dataset:
@@ -46,12 +51,18 @@ mvn spring-boot:run
 
 See [the place import guide](docs/place-import.md) for the CSV/JSON schema and
 deduplication rules. Anonymous interaction totals are available from
-`GET /api/feedback/summary`.
+`GET /api/v1/feedback/summary`.
+
+Production configuration, observability, backups and container deployment are
+documented in [the operations guide](docs/production-operations.md). Test
+layers, the executable end-to-end check and release automation are documented
+in [the testing guide](docs/testing.md).
 
 ## Roadmap
-Expand the real-world place dataset, protect operational endpoints, add
-observability, and deploy a production API.
+Provision managed MongoDB and HTTPS hosting, then begin a closed beta with
+production monitoring and tester interviews.
 
 **Current scope:** functional local Android MVP connected to the recommendation
 backend with indexed geospatial queries, controlled data ingestion,
-recommendation calibration scenarios, and an anonymous feedback loop.
+recommendation calibration scenarios, an anonymous feedback loop, production
+operational controls, and automated verification.

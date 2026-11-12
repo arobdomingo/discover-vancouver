@@ -19,7 +19,7 @@ import com.discovervancouver.model.Place;
 import com.discovervancouver.model.OpeningPeriod;
 
 @DataMongoTest(properties = {
-    "spring.data.mongodb.uri="
+    "spring.mongodb.uri="
         + "mongodb://localhost:27017/discover_vancouver_test"
 })
 class PlaceRepositoryIntegrationTest {

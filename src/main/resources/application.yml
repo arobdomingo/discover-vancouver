@@ -44,7 +44,7 @@ management:
       probes:
         enabled: true
   health:
-    mongo:
+    mongodb:
       enabled: true
   metrics:
     tags:

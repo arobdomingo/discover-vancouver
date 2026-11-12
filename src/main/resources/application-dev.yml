@@ -2,9 +2,8 @@ spring:
   config:
     activate:
       on-profile: dev
-  data:
-    mongodb:
-      uri: ${MONGODB_URI:mongodb://localhost:27017/discover_vancouver}
+  mongodb:
+    uri: ${MONGODB_URI:mongodb://localhost:27017/discover_vancouver}
 
 app:
   weather:

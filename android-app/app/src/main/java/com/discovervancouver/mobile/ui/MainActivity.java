@@ -67,7 +67,8 @@ public final class MainActivity extends AppCompatActivity {
         registerForActivityResult(
             new ActivityResultContracts.RequestPermission(),
             granted -> {
-                if (granted) {
+                if (LocationPermissionPolicy.afterRequest(granted)
+                    == LocationPermissionPolicy.Action.USE_DEVICE_LOCATION) {
                     requestFreshLocation();
                 } else {
                     locationStatus.setText(R.string.location_permission_denied);
@@ -199,10 +200,12 @@ public final class MainActivity extends AppCompatActivity {
     }
 
     private void requestLocation() {
-        if (ContextCompat.checkSelfPermission(
+        boolean alreadyGranted = ContextCompat.checkSelfPermission(
             this,
             Manifest.permission.ACCESS_COARSE_LOCATION
-        ) == PackageManager.PERMISSION_GRANTED) {
+        ) == PackageManager.PERMISSION_GRANTED;
+        if (LocationPermissionPolicy.beforeRequest(alreadyGranted)
+            == LocationPermissionPolicy.Action.USE_DEVICE_LOCATION) {
             requestFreshLocation();
             return;
         }

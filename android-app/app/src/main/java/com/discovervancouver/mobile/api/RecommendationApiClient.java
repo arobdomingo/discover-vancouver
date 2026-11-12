@@ -5,8 +5,6 @@ import android.os.Looper;
 
 import com.discovervancouver.mobile.model.Recommendation;
 
-import org.json.JSONArray;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -14,21 +12,17 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public final class RecommendationApiClient {
-
-    public interface Callback {
-        void onSuccess(List<Recommendation> recommendations);
-        void onError(String message);
-    }
+public final class RecommendationApiClient implements RecommendationDataSource {
 
     private final String baseUrl;
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
+    private final RecommendationJsonParser parser =
+        new RecommendationJsonParser();
 
     public RecommendationApiClient(String baseUrl) {
         this.baseUrl = baseUrl.endsWith("/") ? baseUrl : baseUrl + "/";
@@ -64,7 +58,7 @@ public final class RecommendationApiClient {
                     );
                 }
 
-                List<Recommendation> recommendations = parse(body);
+                List<Recommendation> recommendations = parser.parse(body);
                 mainHandler.post(() -> callback.onSuccess(recommendations));
             } catch (Exception exception) {
                 String message = exception.getMessage() == null
@@ -79,19 +73,9 @@ public final class RecommendationApiClient {
         });
     }
 
-    public void shutdown() {
+    @Override
+    public void close() {
         executor.shutdownNow();
-    }
-
-    private List<Recommendation> parse(String body) throws Exception {
-        JSONArray array = new JSONArray(body);
-        List<Recommendation> recommendations = new ArrayList<>();
-        for (int index = 0; index < array.length(); index++) {
-            recommendations.add(
-                Recommendation.fromJson(array.getJSONObject(index))
-            );
-        }
-        return recommendations;
     }
 
     private String readBody(InputStream stream) throws IOException {
