@@ -4,8 +4,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fillViewport="true"
-    android:background="@color/surface">
+    android:fillViewport="true">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -75,13 +74,15 @@
                     android:id="@+id/categorySpinner"
                     android:layout_width="match_parent"
                     android:layout_height="52dp"
-                    android:layout_marginTop="14dp" />
+                    android:layout_marginTop="14dp"
+                    android:contentDescription="@string/category_hint" />
 
                 <Spinner
                     android:id="@+id/budgetSpinner"
                     android:layout_width="match_parent"
                     android:layout_height="52dp"
-                    android:layout_marginTop="6dp" />
+                    android:layout_marginTop="6dp"
+                    android:contentDescription="@string/budget_hint" />
 
                 <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"

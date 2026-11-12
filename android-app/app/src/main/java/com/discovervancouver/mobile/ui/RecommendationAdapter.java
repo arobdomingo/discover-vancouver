@@ -12,6 +12,7 @@ import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.discovervancouver.mobile.R;
+import com.discovervancouver.mobile.data.PreferencesStore;
 import com.discovervancouver.mobile.model.Recommendation;
 
 import java.util.ArrayList;
@@ -22,11 +23,26 @@ public final class RecommendationAdapter
     extends RecyclerView.Adapter<RecommendationAdapter.ViewHolder> {
 
     private final List<Recommendation> recommendations = new ArrayList<>();
+    private final PreferencesStore preferencesStore;
+
+    public RecommendationAdapter(PreferencesStore preferencesStore) {
+        this.preferencesStore = preferencesStore;
+    }
 
     public void submitList(List<Recommendation> newRecommendations) {
+        int previousSize = recommendations.size();
         recommendations.clear();
+        if (previousSize > 0) {
+            notifyItemRangeRemoved(0, previousSize);
+        }
         recommendations.addAll(newRecommendations);
-        notifyDataSetChanged();
+        if (!newRecommendations.isEmpty()) {
+            notifyItemRangeInserted(0, newRecommendations.size());
+        }
+    }
+
+    public void refreshFavourites() {
+        notifyItemRangeChanged(0, recommendations.size());
     }
 
     @NonNull
@@ -48,7 +64,14 @@ public final class RecommendationAdapter
         Recommendation recommendation = recommendations.get(position);
         Context context = holder.itemView.getContext();
 
-        holder.name.setText(recommendation.getName());
+        holder.name.setText(
+            preferencesStore.isFavourite(recommendation.getPlaceId())
+                ? context.getString(
+                    R.string.favourite_place_name,
+                    recommendation.getName()
+                )
+                : recommendation.getName()
+        );
         holder.openStatus.setText(
             recommendation.isOpenNow() ? "Open" : "Closed"
         );

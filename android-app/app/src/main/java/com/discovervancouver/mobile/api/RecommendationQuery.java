@@ -1,5 +1,6 @@
 package com.discovervancouver.mobile.api;
 
+import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.LinkedHashMap;
@@ -58,6 +59,16 @@ public record RecommendationQuery(
     }
 
     private static String encode(String value) {
-        return URLEncoder.encode(value, StandardCharsets.UTF_8);
+        try {
+            return URLEncoder.encode(
+                value,
+                StandardCharsets.UTF_8.name()
+            );
+        } catch (UnsupportedEncodingException exception) {
+            throw new IllegalStateException(
+                "UTF-8 encoding is unavailable",
+                exception
+            );
+        }
     }
 }

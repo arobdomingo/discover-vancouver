@@ -5,6 +5,11 @@
     <string name="use_location">Use my location</string>
     <string name="location_ready">Using your current location</string>
     <string name="location_default">Using downtown Vancouver</string>
+    <string name="location_finding">Finding your current location…</string>
+    <string name="location_last_known">Using your most recent location</string>
+    <string name="location_unavailable">No location was available; using downtown Vancouver</string>
+    <string name="location_services_disabled">Location services are disabled; using downtown Vancouver</string>
+    <string name="location_permission_denied">Location permission was denied; using downtown Vancouver</string>
     <string name="discover_places">Discover places</string>
     <string name="preferences">What are you looking for?</string>
     <string name="results">Recommended for you</string>
@@ -14,11 +19,19 @@
     <string name="budget_hint">Budget</string>
     <string name="indoor_preference">Prefer indoor places</string>
     <string name="open_only">Only show places open now</string>
-    <string name="walking_range">Walking range: %1$d minutes</string>
-    <string name="loading">Finding nearby places…</string>
-    <string name="retry">Try again</string>
+    <plurals name="walking_range">
+        <item quantity="one">Walking range: %1$d minute</item>
+        <item quantity="other">Walking range: %1$d minutes</item>
+    </plurals>
     <string name="back">Back</string>
     <string name="why_recommended">Why this place</string>
-    <string name="details">Place details</string>
-    <string name="open_in_maps">Open in Maps</string>
+    <string name="local_network_permission_denied">Nearby-device access is required only while developing, so the app can connect to the local Discover Vancouver server.</string>
+    <string name="recommendations_error">Could not load recommendations.\n%1$s</string>
+    <string name="save_favourite">Save favourite</string>
+    <string name="remove_favourite">Remove favourite</string>
+    <string name="favourite_saved">Saved to favourites</string>
+    <string name="favourite_removed">Removed from favourites</string>
+    <string name="favourite_place_name">★ %1$s</string>
+    <string name="walking_directions">Walking directions</string>
+    <string name="maps_unavailable">No maps or browser application is available.</string>
 </resources>

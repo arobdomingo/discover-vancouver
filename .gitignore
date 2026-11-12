@@ -6,3 +6,5 @@ target/
 android-app/.gradle/
 android-app/local.properties
 android-app/**/build/
+android-app/gradle/gradle-daemon-jvm.properties
+output/

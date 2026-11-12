@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/surface">
+    android:layout_height="match_parent">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -52,12 +51,20 @@
             android:textSize="16sp" />
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/mapsButton"
+            android:id="@+id/favouriteButton"
             style="@style/Widget.Material3.Button.OutlinedButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="18dp"
-            android:text="@string/open_in_maps" />
+            android:text="@string/save_favourite" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/mapsButton"
+            style="@style/Widget.Material3.Button.OutlinedButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:text="@string/walking_directions" />
 
         <TextView
             android:layout_width="wrap_content"

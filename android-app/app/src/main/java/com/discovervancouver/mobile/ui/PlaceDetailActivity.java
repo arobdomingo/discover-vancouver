@@ -1,13 +1,16 @@
 package com.discovervancouver.mobile.ui;
 
+import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.discovervancouver.mobile.R;
+import com.discovervancouver.mobile.data.PreferencesStore;
 import com.discovervancouver.mobile.model.Recommendation;
 import com.google.android.material.button.MaterialButton;
 
@@ -32,6 +35,7 @@ public final class PlaceDetailActivity extends AppCompatActivity {
 
         MaterialButton backButton = findViewById(R.id.backButton);
         MaterialButton mapsButton = findViewById(R.id.mapsButton);
+        MaterialButton favouriteButton = findViewById(R.id.favouriteButton);
         TextView name = findViewById(R.id.detailName);
         TextView meta = findViewById(R.id.detailMeta);
         TextView description = findViewById(R.id.detailDescription);
@@ -40,7 +44,25 @@ public final class PlaceDetailActivity extends AppCompatActivity {
         TextView tags = findViewById(R.id.detailTags);
 
         backButton.setOnClickListener(view -> finish());
-        mapsButton.setOnClickListener(view -> openMaps(recommendation));
+        mapsButton.setOnClickListener(view -> openDirections(recommendation));
+        PreferencesStore preferencesStore = new PreferencesStore(this);
+        updateFavouriteButton(
+            favouriteButton,
+            preferencesStore.isFavourite(recommendation.getPlaceId())
+        );
+        favouriteButton.setOnClickListener(view -> {
+            boolean favourite = preferencesStore.toggleFavourite(
+                recommendation.getPlaceId()
+            );
+            updateFavouriteButton(favouriteButton, favourite);
+            Toast.makeText(
+                this,
+                favourite
+                    ? R.string.favourite_saved
+                    : R.string.favourite_removed,
+                Toast.LENGTH_SHORT
+            ).show();
+        });
         name.setText(recommendation.getName());
         meta.setText(String.format(
             Locale.CANADA,
@@ -59,16 +81,37 @@ public final class PlaceDetailActivity extends AppCompatActivity {
             .collect(Collectors.joining("  ")));
     }
 
-    private void openMaps(Recommendation recommendation) {
-        String query = recommendation.getLatitude()
-            + ","
-            + recommendation.getLongitude()
-            + "(" + Uri.encode(recommendation.getName()) + ")";
-        Intent intent = new Intent(
-            Intent.ACTION_VIEW,
-            Uri.parse("geo:0,0?q=" + query)
+    private void openDirections(Recommendation recommendation) {
+        Uri directions = Uri.parse(
+            "https://www.google.com/maps/dir/?api=1"
+        ).buildUpon()
+            .appendQueryParameter(
+                "destination",
+                recommendation.getLatitude()
+                    + ","
+                    + recommendation.getLongitude()
+            )
+            .appendQueryParameter("travelmode", "walking")
+            .build();
+        Intent intent = new Intent(Intent.ACTION_VIEW, directions);
+        try {
+            startActivity(intent);
+        } catch (ActivityNotFoundException exception) {
+            Toast.makeText(
+                this,
+                R.string.maps_unavailable,
+                Toast.LENGTH_LONG
+            ).show();
+        }
+    }
+
+    private void updateFavouriteButton(
+        MaterialButton button,
+        boolean favourite
+    ) {
+        button.setText(
+            favourite ? R.string.remove_favourite : R.string.save_favourite
         );
-        startActivity(Intent.createChooser(intent, "Open location with"));
     }
 
     @SuppressWarnings("deprecation")
