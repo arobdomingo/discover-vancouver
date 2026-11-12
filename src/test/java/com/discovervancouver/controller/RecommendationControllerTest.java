@@ -7,12 +7,22 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.FilterType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.discovervancouver.service.RecommendationService;
+import com.discovervancouver.web.RateLimitFilter;
+import com.discovervancouver.web.RequestIdFilter;
 
-@WebMvcTest(RecommendationController.class)
+@WebMvcTest(
+    controllers = RecommendationController.class,
+    excludeFilters = @ComponentScan.Filter(
+        type = FilterType.ASSIGNABLE_TYPE,
+        classes = {RateLimitFilter.class, RequestIdFilter.class}
+    )
+)
 class RecommendationControllerTest {
 
     @Autowired
@@ -25,7 +35,7 @@ class RecommendationControllerTest {
     void invalidRecommendationParametersReturnBadRequest()
         throws Exception {
 
-        mockMvc.perform(get("/api/recommendations")
+        mockMvc.perform(get("/api/v1/recommendations")
                 .param("lat", "200")
                 .param("lng", "-300")
                 .param("maxWalkingMinutes", "0")
@@ -39,7 +49,7 @@ class RecommendationControllerTest {
 
     @Test
     void invalidParameterTypeReturnsBadRequest() throws Exception {
-        mockMvc.perform(get("/api/recommendations")
+        mockMvc.perform(get("/api/v1/recommendations")
                 .param("lat", "not-a-number")
                 .param("lng", "-123.1207"))
             .andExpect(status().isBadRequest())

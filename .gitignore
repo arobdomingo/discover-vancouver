@@ -1,6 +1,7 @@
 target/
 .DS_Store
 .env
+backups/
 .idea/
 *.iml
 android-app/.gradle/

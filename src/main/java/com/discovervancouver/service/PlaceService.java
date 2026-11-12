@@ -5,6 +5,9 @@ import java.util.Optional;
 
 import org.springframework.data.geo.Distance;
 import org.springframework.data.geo.Metrics;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.geo.GeoJsonPoint;
 import org.springframework.stereotype.Service;
 import com.discovervancouver.model.Place;
@@ -24,6 +27,25 @@ public class PlaceService {
             return placeRepository.findAll();
         }
         return placeRepository.findByCategoryIgnoreCase(category);
+    }
+
+    public Page<Place> getPlaces(
+        String category,
+        int page,
+        int size
+    ) {
+        PageRequest pageable = PageRequest.of(
+            page,
+            size,
+            Sort.by(Sort.Direction.ASC, "name")
+        );
+        if (category == null || category.isBlank()) {
+            return placeRepository.findAll(pageable);
+        }
+        return placeRepository.findByCategoryIgnoreCase(
+            category,
+            pageable
+        );
     }
 
     public List<Place> getPlacesNear(

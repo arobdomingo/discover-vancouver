@@ -16,8 +16,12 @@ import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.FilterType;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -26,8 +30,16 @@ import com.discovervancouver.model.Place;
 import com.discovervancouver.model.OpeningPeriod;
 import com.discovervancouver.service.OpeningHoursService;
 import com.discovervancouver.service.PlaceService;
+import com.discovervancouver.web.RateLimitFilter;
+import com.discovervancouver.web.RequestIdFilter;
 
-@WebMvcTest(PlaceController.class)
+@WebMvcTest(
+    controllers = PlaceController.class,
+    excludeFilters = @ComponentScan.Filter(
+        type = FilterType.ASSIGNABLE_TYPE,
+        classes = {RateLimitFilter.class, RequestIdFilter.class}
+    )
+)
 @Import(PlaceMapper.class)
 class PlaceControllerTest {
 
@@ -44,15 +56,20 @@ class PlaceControllerTest {
     void getPlacesReturnsMappedPlaces() throws Exception {
         when(openingHoursService.isOpenNow(any(Place.class)))
             .thenReturn(true);
-        when(placeService.getPlaces(null))
-            .thenReturn(List.of(createLibrary("place1")));
+        when(placeService.getPlaces(null, 0, 20))
+            .thenReturn(new PageImpl<>(
+                List.of(createLibrary("place1")),
+                PageRequest.of(0, 20),
+                1
+            ));
 
-        mockMvc.perform(get("/api/places"))
+        mockMvc.perform(get("/api/v1/places"))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$[0].id").value("place1"))
-            .andExpect(jsonPath("$[0].name")
+            .andExpect(jsonPath("$.content[0].id").value("place1"))
+            .andExpect(jsonPath("$.content[0].name")
                 .value("Vancouver Public Library Central"))
-            .andExpect(jsonPath("$[0].category").value("study"));
+            .andExpect(jsonPath("$.content[0].category").value("study"))
+            .andExpect(jsonPath("$.totalElements").value(1));
     }
 
     @Test
@@ -83,7 +100,7 @@ class PlaceControllerTest {
             }
             """;
 
-        mockMvc.perform(post("/api/places")
+        mockMvc.perform(post("/api/v1/places")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(requestBody))
             .andExpect(status().isCreated())
@@ -110,7 +127,7 @@ class PlaceControllerTest {
             }
             """;
 
-        mockMvc.perform(post("/api/places")
+        mockMvc.perform(post("/api/v1/places")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(requestBody))
             .andExpect(status().isBadRequest())

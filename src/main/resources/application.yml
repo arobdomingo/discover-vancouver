@@ -1,13 +1,16 @@
 spring:
   application:
     name: discover-vancouver-backend
+  profiles:
+    default: dev
   data:
     mongodb:
-      uri: ${MONGODB_URI:mongodb://localhost:27017/discover_vancouver}
       auto-index-creation: true
 
 server:
   port: ${SERVER_PORT:8080}
+  shutdown: graceful
+  forward-headers-strategy: framework
 
 app:
   time-zone: ${APP_TIME_ZONE:America/Vancouver}
@@ -24,10 +27,32 @@ app:
       rainy-day-tag: ${RECOMMENDATION_WEIGHT_RAINY_DAY_TAG:10}
       time-of-day: ${RECOMMENDATION_WEIGHT_TIME_OF_DAY:8}
       distance-maximum: ${RECOMMENDATION_WEIGHT_DISTANCE_MAXIMUM:20}
-  weather:
-    base-url: ${WEATHER_BASE_URL:https://api.open-meteo.com/v1}
-    connect-timeout: ${WEATHER_CONNECT_TIMEOUT:3s}
-    read-timeout: ${WEATHER_READ_TIMEOUT:5s}
+  rate-limit:
+    requests-per-minute: ${RATE_LIMIT_REQUESTS_PER_MINUTE:120}
   import:
     file: ${PLACE_IMPORT_FILE:}
     source: ${PLACE_IMPORT_SOURCE:}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: never
+      probes:
+        enabled: true
+  health:
+    mongo:
+      enabled: true
+  metrics:
+    tags:
+      application: ${spring.application.name}
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    display-request-duration: true
+  api-docs:
+    path: /v3/api-docs

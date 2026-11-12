@@ -8,11 +8,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import com.discovervancouver.dto.RecommendationResponse;
 import com.discovervancouver.model.Place;
 import com.discovervancouver.exception.WeatherUnavailableException;
 import com.discovervancouver.config.RecommendationProperties;
+
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.DistributionSummary;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Metrics;
+import io.micrometer.core.instrument.Timer;
 
 @Service
 public class RecommendationService {
@@ -23,16 +30,45 @@ public class RecommendationService {
     private final OpeningHoursService openingHoursService;
     private final TimeOfDayService timeOfDayService;
     private final RecommendationProperties properties;
+    private final MeterRegistry meterRegistry;
+    private final Counter recommendationRequests;
+    private final DistributionSummary recommendationResults;
+    private final Timer recommendationLatency;
 
     private static final Logger logger = LoggerFactory.getLogger(RecommendationService.class);
 
-    public RecommendationService(PlaceService placeService, DistanceService distanceService, WeatherService weatherService, OpeningHoursService openingHoursService, TimeOfDayService timeOfDayService, RecommendationProperties properties) {
+    @Autowired
+    public RecommendationService(PlaceService placeService, DistanceService distanceService, WeatherService weatherService, OpeningHoursService openingHoursService, TimeOfDayService timeOfDayService, RecommendationProperties properties, MeterRegistry meterRegistry) {
         this.placeService = placeService;
         this.distanceService = distanceService;
         this.weatherService = weatherService;
         this.openingHoursService = openingHoursService;
         this.timeOfDayService = timeOfDayService;
         this.properties = properties;
+        this.meterRegistry = meterRegistry;
+        this.recommendationRequests = meterRegistry.counter(
+            "discover.recommendations.requests"
+        );
+        this.recommendationResults = DistributionSummary.builder(
+                "discover.recommendations.results"
+            )
+            .register(meterRegistry);
+        this.recommendationLatency = Timer.builder(
+                "discover.recommendations.latency"
+            )
+            .register(meterRegistry);
+    }
+
+    public RecommendationService(PlaceService placeService, DistanceService distanceService, WeatherService weatherService, OpeningHoursService openingHoursService, TimeOfDayService timeOfDayService, RecommendationProperties properties) {
+        this(
+            placeService,
+            distanceService,
+            weatherService,
+            openingHoursService,
+            timeOfDayService,
+            properties,
+            Metrics.globalRegistry
+        );
     }
 
     public List<RecommendationResponse> getRecommendations(double latitude, double longitude, String category, Boolean indoorPreferred, int maxWalkingMinutes, String budgetPreference, String atmosphere) {
@@ -50,6 +86,28 @@ public class RecommendationService {
     }
 
     public List<RecommendationResponse> getRecommendations(double latitude, double longitude, String category, Boolean indoorPreferred, int maxWalkingMinutes, String budgetPreference, String atmosphere, boolean openOnly, int limit) {
+        recommendationRequests.increment();
+        Timer.Sample sample = Timer.start(meterRegistry);
+        try {
+            List<RecommendationResponse> recommendations = calculateRecommendations(
+                latitude,
+                longitude,
+                category,
+                indoorPreferred,
+                maxWalkingMinutes,
+                budgetPreference,
+                atmosphere,
+                openOnly,
+                limit
+            );
+            recommendationResults.record(recommendations.size());
+            return recommendations;
+        } finally {
+            sample.stop(recommendationLatency);
+        }
+    }
+
+    private List<RecommendationResponse> calculateRecommendations(double latitude, double longitude, String category, Boolean indoorPreferred, int maxWalkingMinutes, String budgetPreference, String atmosphere, boolean openOnly, int limit) {
         boolean rainyWeather = getRainyWeatherOrDefault(latitude, longitude);
         int resultLimit = Math.min(limit, properties.getMaximumLimit());
 

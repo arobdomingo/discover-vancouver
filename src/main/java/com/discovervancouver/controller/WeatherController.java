@@ -12,7 +12,7 @@ import com.discovervancouver.dto.WeatherResponse;
 import com.discovervancouver.service.WeatherService;
 
 @RestController
-@RequestMapping("/api/weather")
+@RequestMapping("/api/v1/weather")
 public class WeatherController {
     
     private final WeatherService weatherService;

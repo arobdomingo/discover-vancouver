@@ -18,7 +18,7 @@ import com.discovervancouver.dto.RecommendationResponse;
 import com.discovervancouver.service.RecommendationService;
 
 @RestController
-@RequestMapping("/api/recommendations")
+@RequestMapping("/api/v1/recommendations")
 public class RecommendationController {
 
     private final RecommendationService recommendationService;

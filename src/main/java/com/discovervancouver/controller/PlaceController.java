@@ -1,8 +1,6 @@
 package com.discovervancouver.controller;
 
 import java.net.URI;
-import java.util.List;
-
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,17 +15,21 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 
 import com.discovervancouver.dto.CreatePlaceRequest;
 import com.discovervancouver.dto.PlaceResponse;
+import com.discovervancouver.dto.PagedResponse;
 import com.discovervancouver.dto.UpdatePlaceRequest;
 import com.discovervancouver.mapper.PlaceMapper;
+import com.discovervancouver.exception.ResourceNotFoundException;
 
 import com.discovervancouver.model.Place;
 import com.discovervancouver.service.PlaceService;
 
 @RestController
-@RequestMapping("/api/places")
+@RequestMapping("/api/v1/places")
 public class PlaceController {
 
     private final PlaceService placeService;
@@ -39,11 +41,20 @@ public class PlaceController {
     }
 
     @GetMapping
-    public List<PlaceResponse> getPlaces(@RequestParam(required = false) String category) {
-        return placeService.getPlaces(category)
-            .stream()
-            .map(placeMapper::toResponse)
-            .toList();
+    public PagedResponse<PlaceResponse> getPlaces(
+        @RequestParam(required = false) String category,
+        @RequestParam(defaultValue = "0")
+        @Min(value = 0, message = "page must be at least 0")
+        int page,
+        @RequestParam(defaultValue = "20")
+        @Min(value = 1, message = "size must be at least 1")
+        @Max(value = 100, message = "size must be at most 100")
+        int size
+    ) {
+        return PagedResponse.from(
+            placeService.getPlaces(category, page, size)
+                .map(placeMapper::toResponse)
+        );
     }
 
     @GetMapping("/{placeId}")
@@ -51,7 +62,9 @@ public class PlaceController {
         return placeService.getPlaceById(placeId)
             .map(placeMapper::toResponse)
             .map(ResponseEntity::ok)
-            .orElseGet(() -> ResponseEntity.notFound().build());
+            .orElseThrow(() -> new ResourceNotFoundException(
+                "Place not found: " + placeId
+            ));
     }
 
     @PostMapping
@@ -61,7 +74,7 @@ public class PlaceController {
         Place savedPlace = placeService.createPlace(place);
 
         URI location = uriBuilder
-            .path("/api/places/{placeId}")
+            .path("/api/v1/places/{placeId}")
             .buildAndExpand(savedPlace.getId())
             .toUri();
 
@@ -77,7 +90,9 @@ public class PlaceController {
         return placeService.updatePlace(placeId, updatedPlace)
             .map(placeMapper::toResponse)
             .map(ResponseEntity::ok)
-            .orElseGet(() -> ResponseEntity.notFound().build());
+            .orElseThrow(() -> new ResourceNotFoundException(
+                "Place not found: " + placeId
+            ));
     }
 
     @DeleteMapping("/{placeId}")
@@ -85,7 +100,9 @@ public class PlaceController {
         boolean deleted = placeService.deletePlace(placeId);
 
         if(!deleted){
-            return ResponseEntity.notFound().build();
+            throw new ResourceNotFoundException(
+                "Place not found: " + placeId
+            );
         }
         return ResponseEntity.noContent().build();
     }

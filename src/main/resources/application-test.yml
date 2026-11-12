@@ -1,0 +1,21 @@
+spring:
+  config:
+    activate:
+      on-profile: test
+  data:
+    mongodb:
+      uri: ${MONGODB_URI:mongodb://localhost:27017/discover_vancouver_test}
+
+app:
+  weather:
+    base-url: ${WEATHER_BASE_URL:http://127.0.0.1:9}
+    connect-timeout: ${WEATHER_CONNECT_TIMEOUT:100ms}
+    read-timeout: ${WEATHER_READ_TIMEOUT:100ms}
+  rate-limit:
+    requests-per-minute: 10000
+
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false

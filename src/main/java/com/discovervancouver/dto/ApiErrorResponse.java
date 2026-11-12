@@ -10,6 +10,7 @@ public record ApiErrorResponse(
     String error,
     String message,
     String path,
+    String requestId,
     Map<String, List<String>> errors
 ) {
 

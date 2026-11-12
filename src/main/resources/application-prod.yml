@@ -1,0 +1,24 @@
+spring:
+  config:
+    activate:
+      on-profile: prod
+  data:
+    mongodb:
+      uri: ${MONGODB_URI}
+
+app:
+  weather:
+    base-url: ${WEATHER_BASE_URL:https://api.open-meteo.com/v1}
+    connect-timeout: ${WEATHER_CONNECT_TIMEOUT:2s}
+    read-timeout: ${WEATHER_READ_TIMEOUT:4s}
+
+logging:
+  structured:
+    format:
+      console: logstash
+
+springdoc:
+  api-docs:
+    enabled: ${SPRINGDOC_ENABLED:false}
+  swagger-ui:
+    enabled: ${SPRINGDOC_ENABLED:false}

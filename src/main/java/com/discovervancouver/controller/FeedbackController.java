@@ -14,7 +14,7 @@ import com.discovervancouver.service.FeedbackService;
 import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("/api/feedback")
+@RequestMapping("/api/v1/feedback")
 public class FeedbackController {
 
     private final FeedbackService feedbackService;

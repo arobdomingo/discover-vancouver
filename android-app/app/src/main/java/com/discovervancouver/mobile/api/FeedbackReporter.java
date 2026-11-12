@@ -43,7 +43,7 @@ public final class FeedbackReporter {
                 ? baseUrl
                 : baseUrl + "/";
             connection = (HttpURLConnection) new URL(
-                normalizedBase + "api/feedback"
+                normalizedBase + "api/v1/feedback"
             ).openConnection();
             connection.setRequestMethod("POST");
             connection.setConnectTimeout(3_000);

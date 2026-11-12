@@ -11,6 +11,8 @@ import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.FilterType;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -19,10 +21,18 @@ import com.discovervancouver.dto.CreateFeedbackRequest;
 import com.discovervancouver.dto.FeedbackSummaryResponse;
 import com.discovervancouver.model.FeedbackEventType;
 import com.discovervancouver.service.FeedbackService;
+import com.discovervancouver.web.RateLimitFilter;
+import com.discovervancouver.web.RequestIdFilter;
 
 import static org.mockito.Mockito.when;
 
-@WebMvcTest(FeedbackController.class)
+@WebMvcTest(
+    controllers = FeedbackController.class,
+    excludeFilters = @ComponentScan.Filter(
+        type = FilterType.ASSIGNABLE_TYPE,
+        classes = {RateLimitFilter.class, RequestIdFilter.class}
+    )
+)
 class FeedbackControllerTest {
 
     @Autowired
@@ -33,7 +43,7 @@ class FeedbackControllerTest {
 
     @Test
     void acceptsAnonymousProductFeedback() throws Exception {
-        mockMvc.perform(post("/api/feedback")
+        mockMvc.perform(post("/api/v1/feedback")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""
                     {
@@ -58,7 +68,7 @@ class FeedbackControllerTest {
             )
         );
 
-        mockMvc.perform(get("/api/feedback/summary"))
+        mockMvc.perform(get("/api/v1/feedback/summary"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.totalEvents").value(3))
             .andExpect(jsonPath("$.eventsByType.FAVORITED").value(3));

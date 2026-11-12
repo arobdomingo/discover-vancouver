@@ -43,7 +43,7 @@ public final class RecommendationApiClient {
             try {
                 URL url = new URL(
                     baseUrl
-                        + "api/recommendations?"
+                        + "api/v1/recommendations?"
                         + query.toQueryString()
                 );
                 connection = (HttpURLConnection) url.openConnection();
