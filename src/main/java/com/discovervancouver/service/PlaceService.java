@@ -2,6 +2,9 @@ package com.discovervancouver.service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.LinkedHashMap;
+import java.util.Comparator;
+import java.util.Map;
 
 import org.springframework.data.geo.Distance;
 import org.springframework.data.geo.Metrics;
@@ -59,7 +62,15 @@ public class PlaceService {
             Metrics.KILOMETERS
         );
 
-        return placeRepository.findByLocationNear(origin, radius);
+        Map<String, Place> canonicalPlaces = new LinkedHashMap<>();
+        placeRepository.findByLocationNear(origin, radius).stream()
+            .filter(Place::isDiscoverable)
+            .forEach(place -> canonicalPlaces.merge(
+                canonicalKey(place),
+                place,
+                this::preferHigherQuality
+            ));
+        return List.copyOf(canonicalPlaces.values());
     }
     
     public Optional<Place> getPlaceById(String placeId){
@@ -87,5 +98,28 @@ public class PlaceService {
 
         updatedPlace.setId(placeId);
         return Optional.of(placeRepository.save(updatedPlace));
+    }
+
+    private String canonicalKey(Place place) {
+        return place.getCanonicalPlaceId() == null
+            || place.getCanonicalPlaceId().isBlank()
+                ? "record:" + place.getId()
+                : "canonical:" + place.getCanonicalPlaceId();
+    }
+
+    private Place preferHigherQuality(Place first, Place second) {
+        Comparator<Place> comparator = Comparator
+            .comparingInt((Place place) -> place.getDataQuality().ordinal())
+            .thenComparingInt(place -> -completeness(place));
+        return comparator.compare(first, second) <= 0 ? first : second;
+    }
+
+    private int completeness(Place place) {
+        int score = 0;
+        if (place.isHoursKnown()) score++;
+        if (place.isPriceKnown()) score++;
+        if (place.isIndoorKnown()) score++;
+        if (place.getDescription() != null && !place.getDescription().isBlank()) score++;
+        return score;
     }
 }

@@ -28,5 +28,9 @@ public interface PlaceRepository extends MongoRepository<Place, String> {
         String source,
         String sourceId
     );
+
+    List<Place> findAllBySource(String source);
+
+    List<Place> findAllByCanonicalPlaceId(String canonicalPlaceId);
     
 }

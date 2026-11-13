@@ -18,7 +18,11 @@ public record RecommendationResponse(
     double latitude,
     double longitude,
     boolean rainyWeather,
-    List<String> reasons
+    List<String> reasons,
+    boolean priceKnown,
+    boolean indoorKnown,
+    boolean hoursKnown,
+    String source
 ) {
     
 }

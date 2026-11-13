@@ -62,7 +62,11 @@ public class PlaceMapper{
             place.getOpeningHours(),
             place.getLatitude(),
             place.getLongitude(),
-            place.getTags()
+            place.getTags(),
+            place.isPriceKnown(),
+            place.isIndoorKnown(),
+            place.isHoursKnown(),
+            place.getSource()
         );
     }
 

@@ -72,12 +72,15 @@ public final class RecommendationAdapter
                 )
                 : recommendation.getName()
         );
-        holder.openStatus.setText(
-            recommendation.isOpenNow() ? "Open" : "Closed"
+        holder.openStatus.setText(recommendation.isHoursKnown()
+            ? (recommendation.isOpenNow() ? "Open" : "Closed")
+            : "Hours unknown"
         );
         holder.openStatus.setTextColor(ContextCompat.getColor(
             context,
-            recommendation.isOpenNow() ? R.color.success : R.color.closed
+            !recommendation.isHoursKnown()
+                ? R.color.muted
+                : recommendation.isOpenNow() ? R.color.success : R.color.closed
         ));
         holder.meta.setText(String.format(
             Locale.CANADA,

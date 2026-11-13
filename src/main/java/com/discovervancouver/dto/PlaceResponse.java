@@ -18,6 +18,10 @@ public record PlaceResponse(
     Map<DayOfWeek, List<OpeningPeriod>> openingHours,
     double latitude,
     double longitude,
-    List<String> tags
+    List<String> tags,
+    boolean priceKnown,
+    boolean indoorKnown,
+    boolean hoursKnown,
+    String source
 ) {
 }

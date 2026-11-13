@@ -1,10 +1,13 @@
 package com.discovervancouver.importer;
 
 import java.time.DayOfWeek;
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 
+import com.discovervancouver.model.DataQuality;
 import com.discovervancouver.model.OpeningPeriod;
+import com.discovervancouver.model.PlaceOperatingStatus;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.DecimalMax;
@@ -54,6 +57,55 @@ public record PlaceImportRecord(
 
     @NotNull
     @Size(max = 20)
-    List<@NotBlank @Size(max = 50) String> tags
+    List<@NotBlank @Size(max = 50) String> tags,
+
+    @Size(max = 500)
+    String sourceUrl,
+
+    Instant lastRefreshedAt,
+
+    PlaceOperatingStatus operatingStatus,
+
+    DataQuality dataQuality,
+
+    Boolean priceKnown,
+
+    Boolean indoorKnown,
+
+    Map<String, String> fieldSources
 ) {
+    public PlaceImportRecord(
+        String sourceId,
+        String name,
+        String category,
+        String description,
+        String address,
+        int priceLevel,
+        boolean indoor,
+        Map<DayOfWeek, List<OpeningPeriod>> openingHours,
+        double latitude,
+        double longitude,
+        List<String> tags
+    ) {
+        this(
+            sourceId,
+            name,
+            category,
+            description,
+            address,
+            priceLevel,
+            indoor,
+            openingHours,
+            latitude,
+            longitude,
+            tags,
+            null,
+            null,
+            PlaceOperatingStatus.UNKNOWN,
+            DataQuality.UNKNOWN,
+            true,
+            true,
+            Map.of()
+        );
+    }
 }

@@ -27,6 +27,54 @@ public final class Recommendation implements Serializable {
     private final double longitude;
     private final boolean rainyWeather;
     private final List<String> reasons;
+    private final boolean priceKnown;
+    private final boolean indoorKnown;
+    private final boolean hoursKnown;
+    private final String source;
+
+    public Recommendation(
+        String placeId,
+        String name,
+        String category,
+        String description,
+        String address,
+        int priceLevel,
+        boolean indoor,
+        boolean openNow,
+        List<String> tags,
+        int score,
+        int distanceMeters,
+        int walkingMinutes,
+        double latitude,
+        double longitude,
+        boolean rainyWeather,
+        List<String> reasons,
+        boolean priceKnown,
+        boolean indoorKnown,
+        boolean hoursKnown,
+        String source
+    ) {
+        this.placeId = placeId;
+        this.name = name;
+        this.category = category;
+        this.description = description;
+        this.address = address;
+        this.priceLevel = priceLevel;
+        this.indoor = indoor;
+        this.openNow = openNow;
+        this.tags = List.copyOf(tags);
+        this.score = score;
+        this.distanceMeters = distanceMeters;
+        this.walkingMinutes = walkingMinutes;
+        this.latitude = latitude;
+        this.longitude = longitude;
+        this.rainyWeather = rainyWeather;
+        this.reasons = List.copyOf(reasons);
+        this.priceKnown = priceKnown;
+        this.indoorKnown = indoorKnown;
+        this.hoursKnown = hoursKnown;
+        this.source = source;
+    }
 
     public Recommendation(
         String placeId,
@@ -46,22 +94,12 @@ public final class Recommendation implements Serializable {
         boolean rainyWeather,
         List<String> reasons
     ) {
-        this.placeId = placeId;
-        this.name = name;
-        this.category = category;
-        this.description = description;
-        this.address = address;
-        this.priceLevel = priceLevel;
-        this.indoor = indoor;
-        this.openNow = openNow;
-        this.tags = List.copyOf(tags);
-        this.score = score;
-        this.distanceMeters = distanceMeters;
-        this.walkingMinutes = walkingMinutes;
-        this.latitude = latitude;
-        this.longitude = longitude;
-        this.rainyWeather = rainyWeather;
-        this.reasons = List.copyOf(reasons);
+        this(
+            placeId, name, category, description, address, priceLevel,
+            indoor, openNow, tags, score, distanceMeters, walkingMinutes,
+            latitude, longitude, rainyWeather, reasons,
+            true, true, true, null
+        );
     }
 
     public static Recommendation fromJson(JSONObject json) throws JSONException {
@@ -81,7 +119,11 @@ public final class Recommendation implements Serializable {
             json.getDouble("latitude"),
             json.getDouble("longitude"),
             json.getBoolean("rainyWeather"),
-            stringsFrom(json.optJSONArray("reasons"))
+            stringsFrom(json.optJSONArray("reasons")),
+            json.optBoolean("priceKnown", true),
+            json.optBoolean("indoorKnown", true),
+            json.optBoolean("hoursKnown", true),
+            json.optString("source", null)
         );
     }
 
@@ -114,4 +156,8 @@ public final class Recommendation implements Serializable {
     public double getLongitude() { return longitude; }
     public boolean isRainyWeather() { return rainyWeather; }
     public List<String> getReasons() { return reasons; }
+    public boolean isPriceKnown() { return priceKnown; }
+    public boolean isIndoorKnown() { return indoorKnown; }
+    public boolean isHoursKnown() { return hoursKnown; }
+    public String getSource() { return source; }
 }

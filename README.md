@@ -10,6 +10,9 @@ for discovering places around Vancouver.
 - Recommendation parameters for location, category, indoor preference, walking time, budget and atmosphere.
 - Controlled CSV/JSON place imports with validation, normalization,
   provenance, and source-based updates.
+- Real-place ingestion from Foursquare Open Places snapshots and the City of
+  Vancouver Open Data API, with scheduled refreshes, stale-record handling,
+  source attribution, and conservative cross-source deduplication.
 - Anonymous recommendation feedback events and aggregate engagement counts.
 - Distance and recommendation service tests.
 - A native Android discovery client with fresh location, persisted preferences,
@@ -49,8 +52,30 @@ PLACE_IMPORT_SOURCE=example-data \
 mvn spring-boot:run
 ```
 
+Load the free City of Vancouver sources on startup:
+
+```bash
+PLACE_SOURCES_IMPORT_ON_STARTUP=true \
+VANCOUVER_OPEN_DATA_ENABLED=true \
+mvn spring-boot:run
+```
+
+To combine those official datasets with broad commercial-place coverage,
+export a Metro Vancouver JSON or newline-delimited JSON snapshot from the free
+Foursquare Places Portal, then run:
+
+```bash
+PLACE_SOURCES_IMPORT_ON_STARTUP=true \
+VANCOUVER_OPEN_DATA_ENABLED=true \
+FOURSQUARE_OPEN_PLACES_ENABLED=true \
+FOURSQUARE_OPEN_PLACES_FILE=/absolute/path/metro-vancouver.ndjson \
+mvn spring-boot:run
+```
+
 See [the place import guide](docs/place-import.md) for the CSV/JSON schema and
-deduplication rules. Anonymous interaction totals are available from
+deduplication rules, and [the free place-source guide](docs/free-place-sources.md)
+for source setup, refresh behavior, licensing, and data-quality decisions.
+Anonymous interaction totals are available from
 `GET /api/v1/feedback/summary`.
 
 Production configuration, observability, backups and container deployment are

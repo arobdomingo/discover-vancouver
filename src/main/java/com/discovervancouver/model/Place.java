@@ -11,6 +11,7 @@ import java.time.Instant;
 import java.time.DayOfWeek;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
@@ -22,9 +23,10 @@ import jakarta.validation.constraints.NotNull;
 
 @Document(collection = "places")
 @CompoundIndex(
-    name = "source_identity",
+    name = "source_identity_unique",
     def = "{'source': 1, 'sourceId': 1}",
-    sparse = true
+    sparse = true,
+    unique = true
 )
 public class Place {
     
@@ -63,6 +65,27 @@ public class Place {
     private String sourceId;
 
     private Instant importedAt;
+
+    private String sourceUrl;
+
+    private Instant lastRefreshedAt;
+
+    private Instant lastSeenAt;
+
+    private PlaceOperatingStatus operatingStatus =
+        PlaceOperatingStatus.UNKNOWN;
+
+    private DataQuality dataQuality = DataQuality.UNKNOWN;
+
+    private boolean stale;
+
+    private String canonicalPlaceId;
+
+    private boolean priceKnown = true;
+
+    private boolean indoorKnown = true;
+
+    private Map<String, String> fieldSources = Map.of();
 
     @NotNull
     private List<String> tags;
@@ -156,6 +179,107 @@ public class Place {
         this.source = source;
         this.sourceId = sourceId;
         this.importedAt = importedAt;
+    }
+
+    public void setImportMetadata(
+        String source,
+        String sourceId,
+        String sourceUrl,
+        Instant importedAt,
+        Instant lastRefreshedAt,
+        Instant lastSeenAt,
+        PlaceOperatingStatus operatingStatus,
+        DataQuality dataQuality,
+        boolean stale,
+        boolean priceKnown,
+        boolean indoorKnown,
+        Map<String, String> fieldSources
+    ) {
+        setImportMetadata(source, sourceId, importedAt);
+        this.sourceUrl = sourceUrl;
+        this.lastRefreshedAt = lastRefreshedAt;
+        this.lastSeenAt = lastSeenAt;
+        this.operatingStatus = operatingStatus == null
+            ? PlaceOperatingStatus.UNKNOWN
+            : operatingStatus;
+        this.dataQuality = dataQuality == null
+            ? DataQuality.UNKNOWN
+            : dataQuality;
+        this.stale = stale;
+        this.priceKnown = priceKnown;
+        this.indoorKnown = indoorKnown;
+        this.fieldSources = fieldSources == null
+            ? Map.of()
+            : Map.copyOf(fieldSources);
+    }
+
+    public String getSourceUrl() {
+        return sourceUrl;
+    }
+
+    public Instant getLastRefreshedAt() {
+        return lastRefreshedAt;
+    }
+
+    public Instant getLastSeenAt() {
+        return lastSeenAt;
+    }
+
+    public PlaceOperatingStatus getOperatingStatus() {
+        return operatingStatus;
+    }
+
+    public DataQuality getDataQuality() {
+        return dataQuality;
+    }
+
+    public boolean isStale() {
+        return stale;
+    }
+
+    public void markStale() {
+        stale = true;
+    }
+
+    public void markActive(Instant seenAt) {
+        stale = false;
+        lastSeenAt = seenAt;
+    }
+
+    public boolean isDiscoverable() {
+        return !stale
+            && operatingStatus != PlaceOperatingStatus.PERMANENTLY_CLOSED
+            && operatingStatus != PlaceOperatingStatus.TEMPORARILY_CLOSED;
+    }
+
+    public String getCanonicalPlaceId() {
+        return canonicalPlaceId;
+    }
+
+    public void setCanonicalPlaceId(String canonicalPlaceId) {
+        this.canonicalPlaceId = canonicalPlaceId;
+    }
+
+    public void ensureCanonicalPlaceId() {
+        if (canonicalPlaceId == null || canonicalPlaceId.isBlank()) {
+            canonicalPlaceId = UUID.randomUUID().toString();
+        }
+    }
+
+    public boolean isPriceKnown() {
+        return priceKnown;
+    }
+
+    public boolean isIndoorKnown() {
+        return indoorKnown;
+    }
+
+    public boolean isHoursKnown() {
+        return openingHours != null && !openingHours.isEmpty();
+    }
+
+    public Map<String, String> getFieldSources() {
+        return fieldSources;
     }
 
     public List<String> getTags(){

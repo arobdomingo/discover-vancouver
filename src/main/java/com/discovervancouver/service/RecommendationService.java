@@ -123,7 +123,9 @@ public class RecommendationService {
             ).stream()
             .map(place -> createCandidate(place, latitude, longitude))
             .filter(candidate -> candidate.walkingMinutes() <= maxWalkingMinutes)
-            .filter(candidate -> !openOnly || candidate.openNow())
+            .filter(candidate -> !openOnly
+                || !candidate.place().isHoursKnown()
+                || candidate.openNow())
             .map(candidate -> scorePlace(candidate, category, indoorPreferred, maxWalkingMinutes, budgetPreference, atmosphere, rainyWeather))
             .sorted(
                 Comparator.comparingInt(RecommendationResponse::score)
@@ -180,7 +182,9 @@ public class RecommendationService {
             reasons.add("Matches your " + category + " preference");
         }
 
-        if(indoorPreferred != null && place.isIndoor() == indoorPreferred) {
+        if(indoorPreferred != null
+            && place.isIndoorKnown()
+            && place.isIndoor() == indoorPreferred) {
             score += weights.getIndoor();
             reasons.add(indoorPreferred
                 ? "Works well as an indoor option"
@@ -193,7 +197,9 @@ public class RecommendationService {
             reasons.add("Open now");
         }
 
-        if(budgetPreference != null && !budgetPreference.isBlank()) {
+        if(place.isPriceKnown()
+            && budgetPreference != null
+            && !budgetPreference.isBlank()) {
             Integer preferredPriceLevel = priceLevelForBudget(budgetPreference);
 
             if(preferredPriceLevel != null && place.getPriceLevel() <= preferredPriceLevel){
@@ -207,7 +213,7 @@ public class RecommendationService {
             reasons.add("Matches your " + atmosphere +" atmosphere preference");
         }
 
-        if(rainyWeather && place.isIndoor()){
+        if(rainyWeather && place.isIndoorKnown() && place.isIndoor()){
             score += weights.getRainyIndoor();
             reasons.add("Good indoor option for rainy weather");
         }
@@ -251,7 +257,11 @@ public class RecommendationService {
             place.getLatitude(),
             place.getLongitude(),
             rainyWeather,
-            reasons
+            reasons,
+            place.isPriceKnown(),
+            place.isIndoorKnown(),
+            place.isHoursKnown(),
+            place.getSource()
         );
     }
 

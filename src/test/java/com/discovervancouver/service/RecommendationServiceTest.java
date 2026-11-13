@@ -21,6 +21,8 @@ import com.discovervancouver.dto.WeatherResponse;
 import com.discovervancouver.dto.RecommendationResponse;
 import com.discovervancouver.model.Place;
 import com.discovervancouver.model.OpeningPeriod;
+import com.discovervancouver.model.DataQuality;
+import com.discovervancouver.model.PlaceOperatingStatus;
 import com.discovervancouver.config.RecommendationProperties;
 
 public class RecommendationServiceTest {
@@ -385,6 +387,75 @@ public class RecommendationServiceTest {
 
         assertEquals(1, recommendations.size());
         assertEquals("open", recommendations.get(0).placeId());
+    }
+
+    @Test
+    void unknownFactsRemainEligibleWithoutReceivingMatchBonuses() {
+        PlaceService placeService = mock(PlaceService.class);
+        WeatherService weatherService = mock(WeatherService.class);
+        OpeningHoursService hoursService = mock(OpeningHoursService.class);
+        Place unknown = new Place(
+            "unknown",
+            "Unverified Cafe",
+            "cafe",
+            "A source record with incomplete attributes.",
+            "Vancouver, BC",
+            0,
+            false,
+            Map.of(),
+            49.2827,
+            -123.1207,
+            List.of("cafe")
+        );
+        unknown.setImportMetadata(
+            "foursquare-open-places",
+            "unknown-1",
+            null,
+            Instant.parse("2026-10-01T00:00:00Z"),
+            null,
+            Instant.parse("2026-10-01T00:00:00Z"),
+            PlaceOperatingStatus.OPEN,
+            DataQuality.MEDIUM,
+            false,
+            false,
+            false,
+            Map.of()
+        );
+
+        when(placeService.getPlacesNear(49.2827, -123.1207, 1_600))
+            .thenReturn(List.of(unknown));
+        when(hoursService.isOpenNow(unknown)).thenReturn(false);
+        when(weatherService.getCurrentWeatherResponse(49.2827, -123.1207))
+            .thenReturn(new WeatherResponse(12.0, 0.0, 3, false));
+
+        RecommendationService recommendationService = new RecommendationService(
+            placeService,
+            new DistanceService(),
+            weatherService,
+            hoursService,
+            timeOfDayService,
+            properties
+        );
+
+        RecommendationResponse result = recommendationService.getRecommendations(
+            49.2827,
+            -123.1207,
+            null,
+            true,
+            20,
+            "free",
+            null,
+            true,
+            10
+        ).get(0);
+
+        assertEquals(false, result.priceKnown());
+        assertEquals(false, result.indoorKnown());
+        assertEquals(false, result.hoursKnown());
+        assertEquals(false, result.reasons().stream()
+            .anyMatch(reason -> reason.contains("budget preference")));
+        assertEquals(false, result.reasons().stream()
+            .anyMatch(reason -> reason.contains("indoor option")));
     }
 
     @Test

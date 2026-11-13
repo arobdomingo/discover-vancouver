@@ -82,7 +82,9 @@ public final class PlaceDetailActivity extends AppCompatActivity {
             "%s • %d min walk • %s",
             recommendation.getCategory(),
             recommendation.getWalkingMinutes(),
-            recommendation.isOpenNow() ? "Open now" : "Closed now"
+            recommendation.isHoursKnown()
+                ? (recommendation.isOpenNow() ? "Open now" : "Closed now")
+                : "Hours unavailable"
         ));
         description.setText(recommendation.getDescription());
         address.setText(recommendation.getAddress());

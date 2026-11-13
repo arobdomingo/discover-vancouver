@@ -94,6 +94,28 @@ class PlaceImportServiceTest {
         verify(repository, never()).save(org.mockito.ArgumentMatchers.any());
     }
 
+    @Test
+    void completeSnapshotMarksMissingSourceRecordsStale() {
+        Place missing = validPlace("missing-id");
+        missing.setImportMetadata(
+            "city-data",
+            "missing-source-id",
+            Instant.parse("2026-11-01T00:00:00Z")
+        );
+        when(repository.findBySourceAndSourceId("city-data", "cafe-1"))
+            .thenReturn(Optional.empty());
+        when(repository.findAllBySource("city-data"))
+            .thenReturn(List.of(missing));
+
+        PlaceImportReport report = service.importSnapshot(
+            "city-data",
+            List.of(validRecord("cafe-1", "cafe"))
+        );
+
+        assertEquals(1, report.staleMarked());
+        assertEquals(true, missing.isStale());
+    }
+
     private PlaceImportRecord validRecord(
         String sourceId,
         String category

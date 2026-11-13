@@ -26,6 +26,10 @@ public class RecommendationJsonParserTest {
         assertEquals("Burrard Coffee", results.get(0).getName());
         assertEquals(5, results.get(0).getWalkingMinutes());
         assertFalse(results.get(0).getReasons().isEmpty());
+        assertFalse(results.get(0).isPriceKnown());
+        assertFalse(results.get(0).isIndoorKnown());
+        assertFalse(results.get(0).isHoursKnown());
+        assertEquals("foursquare-open-places", results.get(0).getSource());
     }
 
     @Test
@@ -67,7 +71,11 @@ public class RecommendationJsonParserTest {
               "latitude":49.2827,
               "longitude":-123.1207,
               "rainyWeather":false,
-              "reasons":["Matches your cafe preference"]
+              "reasons":["Matches your cafe preference"],
+              "priceKnown":false,
+              "indoorKnown":false,
+              "hoursKnown":false,
+              "source":"foursquare-open-places"
             }]
             """;
     }

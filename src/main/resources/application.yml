@@ -32,6 +32,23 @@ app:
   import:
     file: ${PLACE_IMPORT_FILE:}
     source: ${PLACE_IMPORT_SOURCE:}
+  place-sources:
+    import-on-startup: ${PLACE_SOURCES_IMPORT_ON_STARTUP:false}
+    refresh-delay: ${PLACE_SOURCES_REFRESH_DELAY:PT168H}
+    initial-delay: ${PLACE_SOURCES_INITIAL_DELAY:PT5M}
+    foursquare:
+      enabled: ${FOURSQUARE_OPEN_PLACES_ENABLED:false}
+      file: ${FOURSQUARE_OPEN_PLACES_FILE:}
+      min-latitude: ${PLACES_MIN_LATITUDE:49.0}
+      max-latitude: ${PLACES_MAX_LATITUDE:49.5}
+      min-longitude: ${PLACES_MIN_LONGITUDE:-123.5}
+      max-longitude: ${PLACES_MAX_LONGITUDE:-122.5}
+    vancouver:
+      enabled: ${VANCOUVER_OPEN_DATA_ENABLED:false}
+      base-url: ${VANCOUVER_OPEN_DATA_BASE_URL:https://opendata.vancouver.ca}
+      page-size: ${VANCOUVER_OPEN_DATA_PAGE_SIZE:100}
+      connect-timeout: ${VANCOUVER_OPEN_DATA_CONNECT_TIMEOUT:5s}
+      read-timeout: ${VANCOUVER_OPEN_DATA_READ_TIMEOUT:20s}
 
 management:
   endpoints:
