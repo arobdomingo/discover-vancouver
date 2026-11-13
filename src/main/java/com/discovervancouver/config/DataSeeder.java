@@ -8,6 +8,8 @@ import java.util.Map;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.core.annotation.Order;
 
 import com.discovervancouver.model.Place;
@@ -15,6 +17,12 @@ import com.discovervancouver.model.OpeningPeriod;
 import com.discovervancouver.repository.PlaceRepository;
 
 @Configuration
+@Profile("dev")
+@ConditionalOnProperty(
+    prefix = "app.seed-data",
+    name = "enabled",
+    havingValue = "true"
+)
 public class DataSeeder {
     
     @Bean

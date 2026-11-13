@@ -14,9 +14,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.mongodb.test.autoconfigure.DataMongoTest;
+import org.springframework.data.mongodb.core.MongoTemplate;
 
 import com.discovervancouver.model.Place;
 import com.discovervancouver.model.OpeningPeriod;
+import com.discovervancouver.support.TestDatabaseGuard;
 
 @DataMongoTest(properties = {
     "spring.mongodb.uri="
@@ -27,13 +29,18 @@ class PlaceRepositoryIntegrationTest {
     @Autowired
     private PlaceRepository placeRepository;
 
+    @Autowired
+    private MongoTemplate mongoTemplate;
+
     @BeforeEach
     void cleanBeforeTest() {
+        TestDatabaseGuard.requireIsolatedDatabase(mongoTemplate);
         placeRepository.deleteAll();
     }
 
     @AfterEach
     void cleanAfterTest() {
+        TestDatabaseGuard.requireIsolatedDatabase(mongoTemplate);
         placeRepository.deleteAll();
     }
 

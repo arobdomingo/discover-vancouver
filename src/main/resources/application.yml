@@ -33,9 +33,8 @@ app:
     file: ${PLACE_IMPORT_FILE:}
     source: ${PLACE_IMPORT_SOURCE:}
   place-sources:
-    import-on-startup: ${PLACE_SOURCES_IMPORT_ON_STARTUP:false}
-    refresh-delay: ${PLACE_SOURCES_REFRESH_DELAY:PT168H}
-    initial-delay: ${PLACE_SOURCES_INITIAL_DELAY:PT5M}
+    batch-size: ${PLACE_IMPORT_BATCH_SIZE:500}
+    report-file: ${PLACE_QUALITY_REPORT_FILE:output/place-data-quality-report.json}
     foursquare:
       enabled: ${FOURSQUARE_OPEN_PLACES_ENABLED:false}
       file: ${FOURSQUARE_OPEN_PLACES_FILE:}

@@ -101,11 +101,10 @@ licensing notices outside the source history.
 Run a local snapshot plus City sources:
 
 ```bash
-PLACE_SOURCES_IMPORT_ON_STARTUP=true \
 FOURSQUARE_OPEN_PLACES_ENABLED=true \
 FOURSQUARE_OPEN_PLACES_FILE=/absolute/path/metro-vancouver.ndjson \
 VANCOUVER_OPEN_DATA_ENABLED=true \
-mvn spring-boot:run
+./scripts/import-places.sh
 ```
 
 The default geographic filter is latitude `49.0..49.5` and longitude
@@ -123,9 +122,8 @@ usable Metro Vancouver coordinate are skipped.
 Enable it with:
 
 ```bash
-PLACE_SOURCES_IMPORT_ON_STARTUP=true \
 VANCOUVER_OPEN_DATA_ENABLED=true \
-mvn spring-boot:run
+./scripts/import-places.sh
 ```
 
 Useful overrides are `VANCOUVER_OPEN_DATA_BASE_URL`,
@@ -147,18 +145,22 @@ as “closed” and presenting a default price as verified.
 
 ## Phase 6: refreshes and failures
 
-The scheduler defaults to a seven-day fixed delay and a five-minute initial
-delay. Set `PLACE_SOURCES_REFRESH_DELAY` and `PLACE_SOURCES_INITIAL_DELAY` using
-ISO-8601 durations such as `PT24H`.
+Refreshes are a separate one-shot process. The web service never imports on
+startup and contains no ingestion scheduler. Run `scripts/import-places.sh`
+manually, from cron, or from a managed scheduled-job service. This keeps a slow
+or failed provider refresh from delaying or destabilizing API startup.
 
 Each completed source snapshot updates seen records and marks missing records
-stale. It does not delete them. A failed source download logs the exception and
-leaves the last successful catalog intact. Import reports log created, updated,
-rejected, stale, and duplicate-linked counts.
+stale. It does not delete them. A failed source download leaves the last
+successful catalog intact and makes the job exit unsuccessfully. Import metrics
+record runs, duration, created, updated, rejected, stale, and duplicate-linked
+counts per source.
 
-For Foursquare, replace the configured export file before the scheduled job or
-restart with startup import enabled. A later deployment can automate the Portal
-query as a separate data job without coupling credentials to the web service.
+For Foursquare, replace the configured export file before invoking the job.
+The job writes a catalog-wide report to
+`output/place-data-quality-report.json`; override that location with
+`PLACE_QUALITY_REPORT_FILE`. Use `PLACE_IMPORT_BATCH_SIZE` to tune MongoDB write
+batches (default `500`).
 
 ## Phase 7: quality controls
 

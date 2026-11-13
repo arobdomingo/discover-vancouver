@@ -6,6 +6,8 @@ spring:
     uri: ${MONGODB_URI:mongodb://localhost:27017/discover_vancouver}
 
 app:
+  seed-data:
+    enabled: ${SEED_DATA_ENABLED:true}
   weather:
     base-url: ${WEATHER_BASE_URL:https://api.open-meteo.com/v1}
     connect-timeout: ${WEATHER_CONNECT_TIMEOUT:3s}

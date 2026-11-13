@@ -11,7 +11,7 @@ for discovering places around Vancouver.
 - Controlled CSV/JSON place imports with validation, normalization,
   provenance, and source-based updates.
 - Real-place ingestion from Foursquare Open Places snapshots and the City of
-  Vancouver Open Data API, with scheduled refreshes, stale-record handling,
+  Vancouver Open Data API, with isolated refresh jobs, stale-record handling,
   source attribution, and conservative cross-source deduplication.
 - Anonymous recommendation feedback events and aggregate engagement counts.
 - Distance and recommendation service tests.
@@ -44,20 +44,19 @@ Example request:
 GET http://localhost:8080/api/v1/recommendations?lat=49.2827&lng=-123.1207&maxWalkingMinutes=20
 ```
 
-Import the example dataset:
+Import the example dataset through the one-shot ingestion process:
 
 ```bash
 PLACE_IMPORT_FILE="$PWD/data/examples/places.csv" \
 PLACE_IMPORT_SOURCE=example-data \
-mvn spring-boot:run
+./scripts/import-places.sh
 ```
 
-Load the free City of Vancouver sources on startup:
+Load the free City of Vancouver sources without coupling ingestion to the API:
 
 ```bash
-PLACE_SOURCES_IMPORT_ON_STARTUP=true \
 VANCOUVER_OPEN_DATA_ENABLED=true \
-mvn spring-boot:run
+./scripts/import-places.sh
 ```
 
 To combine those official datasets with broad commercial-place coverage,
@@ -65,12 +64,15 @@ export a Metro Vancouver JSON or newline-delimited JSON snapshot from the free
 Foursquare Places Portal, then run:
 
 ```bash
-PLACE_SOURCES_IMPORT_ON_STARTUP=true \
 VANCOUVER_OPEN_DATA_ENABLED=true \
 FOURSQUARE_OPEN_PLACES_ENABLED=true \
 FOURSQUARE_OPEN_PLACES_FILE=/absolute/path/metro-vancouver.ndjson \
-mvn spring-boot:run
+./scripts/import-places.sh
 ```
+
+The job exits unsuccessfully when a configured source fails and writes
+`output/place-data-quality-report.json`. Ordinary `mvn spring-boot:run` only
+starts the API and never imports or refreshes place sources.
 
 See [the place import guide](docs/place-import.md) for the CSV/JSON schema and
 deduplication rules, and [the free place-source guide](docs/free-place-sources.md)

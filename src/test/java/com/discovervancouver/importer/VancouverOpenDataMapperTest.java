@@ -53,6 +53,19 @@ class VancouverOpenDataMapperTest {
     }
 
     @Test
+    void rejectsExplicitlyInactiveCulturalSpace() {
+        assertTrue(mapper.map(
+            VancouverDataset.CULTURAL_SPACES,
+            Map.of(
+                "cultural_space_name", "Former Venue",
+                "active_space", "No",
+                "geo_point_2d", Map.of("lat", 49.28, "lon", -123.12)
+            ),
+            List.of()
+        ).isEmpty());
+    }
+
+    @Test
     void mapsCurrentCulturalSpaceFieldNamesAndNestedGeometry() {
         Map<String, Object> raw = Map.of(
             "cultural_space_name", "Acme Studios",

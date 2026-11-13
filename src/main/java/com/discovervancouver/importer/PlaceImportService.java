@@ -19,6 +19,7 @@ import com.discovervancouver.model.Place;
 import com.discovervancouver.model.DataQuality;
 import com.discovervancouver.model.PlaceOperatingStatus;
 import com.discovervancouver.repository.PlaceRepository;
+import com.discovervancouver.config.PlaceSourceProperties;
 
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
@@ -30,18 +31,21 @@ public class PlaceImportService {
     private final Validator validator;
     private final Clock clock;
     private final PlaceDeduplicationService deduplicationService;
+    private final int batchSize;
 
     @Autowired
     public PlaceImportService(
         PlaceRepository placeRepository,
         Validator validator,
         Clock clock,
-        PlaceDeduplicationService deduplicationService
+        PlaceDeduplicationService deduplicationService,
+        PlaceSourceProperties properties
     ) {
         this.placeRepository = placeRepository;
         this.validator = validator;
         this.clock = clock;
         this.deduplicationService = deduplicationService;
+        this.batchSize = Math.max(1, properties.getBatchSize());
     }
 
     public PlaceImportService(
@@ -53,7 +57,8 @@ public class PlaceImportService {
             placeRepository,
             validator,
             clock,
-            new PlaceDeduplicationService(placeRepository)
+            new PlaceDeduplicationService(placeRepository),
+            defaultProperties()
         );
     }
 
@@ -89,6 +94,7 @@ public class PlaceImportService {
         String normalizedSource = normalizeIdentifier(source);
         Set<String> seenSourceIds = new HashSet<>();
         Instant importTime = Instant.now(clock);
+        List<Place> pending = new ArrayList<>(batchSize);
 
         for (int index = 0; index < records.size(); index++) {
             PlaceImportRecord record = records.get(index);
@@ -125,7 +131,10 @@ public class PlaceImportService {
             PlaceDeduplicationService.MatchResult match =
                 deduplicationService.canonicalize(imported, existing);
             imported.setCanonicalPlaceId(match.canonicalPlaceId());
-            placeRepository.save(imported);
+            pending.add(imported);
+            if (pending.size() >= batchSize) {
+                flush(pending);
+            }
 
             if (match.duplicateLinked()) {
                 duplicatesLinked++;
@@ -137,17 +146,20 @@ public class PlaceImportService {
                 updated++;
             }
         }
+        flush(pending);
 
         int staleMarked = 0;
         if (completeSnapshot) {
+            List<Place> stalePlaces = new ArrayList<>();
             for (Place existing : placeRepository.findAllBySource(normalizedSource)) {
                 if (!seenSourceIds.contains(existing.getSourceId())
                     && !existing.isStale()) {
                     existing.markStale();
-                    placeRepository.save(existing);
+                    stalePlaces.add(existing);
                     staleMarked++;
                 }
             }
+            flush(stalePlaces);
         }
 
         return new PlaceImportReport(
@@ -158,6 +170,16 @@ public class PlaceImportService {
             duplicatesLinked,
             List.copyOf(errors)
         );
+    }
+
+    private void flush(List<Place> places) {
+        if (places.isEmpty()) return;
+        placeRepository.saveAll(List.copyOf(places));
+        places.clear();
+    }
+
+    private static PlaceSourceProperties defaultProperties() {
+        return new PlaceSourceProperties();
     }
 
     private Place toPlace(

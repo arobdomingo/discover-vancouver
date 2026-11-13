@@ -9,14 +9,15 @@ import org.springframework.stereotype.Component;
 @ConfigurationProperties(prefix = "app.place-sources")
 public class PlaceSourceProperties {
 
-    private boolean importOnStartup;
+    private int batchSize = 500;
+    private String reportFile = "output/place-data-quality-report.json";
     private final Foursquare foursquare = new Foursquare();
     private final Vancouver vancouver = new Vancouver();
 
-    public boolean isImportOnStartup() { return importOnStartup; }
-    public void setImportOnStartup(boolean importOnStartup) {
-        this.importOnStartup = importOnStartup;
-    }
+    public int getBatchSize() { return batchSize; }
+    public void setBatchSize(int batchSize) { this.batchSize = batchSize; }
+    public String getReportFile() { return reportFile; }
+    public void setReportFile(String reportFile) { this.reportFile = reportFile; }
     public Foursquare getFoursquare() { return foursquare; }
     public Vancouver getVancouver() { return vancouver; }
 

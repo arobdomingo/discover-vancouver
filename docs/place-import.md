@@ -1,12 +1,13 @@
 # Place data import
 
-The backend can import controlled CSV or JSON datasets when it starts. Importing
-is disabled unless both `PLACE_IMPORT_FILE` and `PLACE_IMPORT_SOURCE` are set.
+The one-shot ingestion process can import controlled CSV or JSON datasets.
+Importing is disabled unless both `PLACE_IMPORT_FILE` and
+`PLACE_IMPORT_SOURCE` are set.
 
 ```bash
 PLACE_IMPORT_FILE=/absolute/path/places.csv \
 PLACE_IMPORT_SOURCE=vancouver-open-data \
-mvn spring-boot:run
+./scripts/import-places.sh
 ```
 
 `PLACE_IMPORT_SOURCE` identifies the dataset. Each record also needs a stable

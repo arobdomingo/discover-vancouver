@@ -26,6 +26,7 @@ public class VancouverOpenDataMapper {
         List<String> relatedTags
     ) {
         Map<String, Object> values = normalizeKeys(raw);
+        if (isInactive(values)) return Optional.empty();
         String name = first(values,
             "name", "sitename", "businessname", "vendorname",
             "programname", "organizationname", "spacename",
@@ -56,7 +57,9 @@ public class VancouverOpenDataMapper {
             "primaryuse", "type", "businesstype", "facilitytype",
             "localarea", "neighbourhoodname", "programtype"
         ));
-        relatedTags.forEach(tag -> addTag(tags, tag));
+        relatedTags.stream()
+            .limit(Math.max(0, 20 - tags.size()))
+            .forEach(tag -> addTag(tags, tag));
 
         String source = "vancouver-" + dataset.id();
         return Optional.of(new PlaceImportRecord(
@@ -107,6 +110,19 @@ public class VancouverOpenDataMapper {
         if (!detail.isBlank()) return detail;
         return name + " is an official " + dataset.category()
             + " location published by the City of Vancouver.";
+    }
+
+    private boolean isInactive(Map<String, Object> values) {
+        String active = first(values, "activespace", "active");
+        if (!active.isBlank() && Set.of("no", "false", "inactive")
+            .contains(active.toLowerCase(Locale.ROOT))) {
+            return true;
+        }
+        String status = first(values, "status", "operatingstatus")
+            .toLowerCase(Locale.ROOT);
+        return status.contains("permanently closed")
+            || status.equals("closed")
+            || status.equals("inactive");
     }
 
     private String address(Map<String, Object> values) {

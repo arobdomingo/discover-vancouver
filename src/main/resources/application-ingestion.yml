@@ -1,0 +1,12 @@
+spring:
+  config:
+    activate:
+      on-profile: ingestion
+  main:
+    lazy-initialization: true
+  mongodb:
+    uri: ${MONGODB_URI:mongodb://localhost:27017/discover_vancouver}
+
+app:
+  seed-data:
+    enabled: false

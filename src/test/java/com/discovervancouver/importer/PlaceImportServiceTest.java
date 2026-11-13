@@ -49,9 +49,10 @@ class PlaceImportServiceTest {
             List.of(validRecord(" Cafe-1 ", " CAFE "))
         );
 
-        ArgumentCaptor<Place> captor = ArgumentCaptor.forClass(Place.class);
-        verify(repository).save(captor.capture());
-        Place saved = captor.getValue();
+        @SuppressWarnings("unchecked")
+        ArgumentCaptor<List<Place>> captor = ArgumentCaptor.forClass(List.class);
+        verify(repository).saveAll(captor.capture());
+        Place saved = captor.getValue().getFirst();
         assertEquals(1, report.created());
         assertEquals(0, report.updated());
         assertEquals("cafe", saved.getCategory());
@@ -73,9 +74,10 @@ class PlaceImportServiceTest {
             List.of(validRecord("cafe-1", "cafe"))
         );
 
-        ArgumentCaptor<Place> captor = ArgumentCaptor.forClass(Place.class);
-        verify(repository).save(captor.capture());
-        assertEquals("mongo-id", captor.getValue().getId());
+        @SuppressWarnings("unchecked")
+        ArgumentCaptor<List<Place>> captor = ArgumentCaptor.forClass(List.class);
+        verify(repository).saveAll(captor.capture());
+        assertEquals("mongo-id", captor.getValue().getFirst().getId());
         assertEquals(0, report.created());
         assertEquals(1, report.updated());
     }
@@ -91,7 +93,7 @@ class PlaceImportServiceTest {
 
         assertEquals(1, report.rejected());
         assertEquals(1, report.errors().size());
-        verify(repository, never()).save(org.mockito.ArgumentMatchers.any());
+        verify(repository, never()).saveAll(org.mockito.ArgumentMatchers.any());
     }
 
     @Test

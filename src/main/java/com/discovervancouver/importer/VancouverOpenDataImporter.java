@@ -29,7 +29,7 @@ public class VancouverOpenDataImporter {
         this.importService = importService;
     }
 
-    public Map<VancouverDataset, PlaceImportReport> importAll() {
+    public VancouverImportResult importAll() {
         Map<String, List<String>> parkFacilities;
         try {
             parkFacilities = parkFacilities();
@@ -41,10 +41,15 @@ public class VancouverOpenDataImporter {
             parkFacilities = Map.of();
         }
         Map<VancouverDataset, PlaceImportReport> reports = new HashMap<>();
+        Map<VancouverDataset, String> failures = new HashMap<>();
         for (VancouverDataset dataset : VancouverDataset.values()) {
             try {
                 List<PlaceImportRecord> records = new ArrayList<>();
-                for (Map<String, Object> raw : client.fetchAll(dataset.id())) {
+                List<Map<String, Object>> rawRecords = newestSnapshot(
+                    dataset,
+                    client.fetchAll(dataset.id())
+                );
+                for (Map<String, Object> raw : rawRecords) {
                     List<String> relatedTags = dataset == VancouverDataset.PARKS
                         ? parkFacilities.getOrDefault(
                             mapper.sourceId(raw),
@@ -61,6 +66,9 @@ public class VancouverOpenDataImporter {
                     )
                 );
             } catch (RuntimeException exception) {
+                failures.put(dataset, exception.getMessage() == null
+                    ? exception.getClass().getSimpleName()
+                    : exception.getMessage());
                 logger.error(
                     "Vancouver dataset refresh failed dataset={}",
                     dataset.id(),
@@ -68,7 +76,32 @@ public class VancouverOpenDataImporter {
                 );
             }
         }
-        return reports;
+        return new VancouverImportResult(reports, failures);
+    }
+
+    private List<Map<String, Object>> newestSnapshot(
+        VancouverDataset dataset,
+        List<Map<String, Object>> records
+    ) {
+        if (dataset != VancouverDataset.CULTURAL_SPACES) return records;
+        int latestYear = records.stream()
+            .map(record -> record.get("year"))
+            .mapToInt(this::year)
+            .max()
+            .orElse(Integer.MIN_VALUE);
+        if (latestYear == Integer.MIN_VALUE) return records;
+        return records.stream()
+            .filter(record -> year(record.get("year")) == latestYear)
+            .toList();
+    }
+
+    private int year(Object value) {
+        if (value == null) return Integer.MIN_VALUE;
+        try {
+            return Integer.parseInt(value.toString());
+        } catch (NumberFormatException ignored) {
+            return Integer.MIN_VALUE;
+        }
     }
 
     private Map<String, List<String>> parkFacilities() {

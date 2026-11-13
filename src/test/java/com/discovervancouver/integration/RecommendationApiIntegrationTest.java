@@ -20,12 +20,14 @@ import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.data.mongodb.core.MongoTemplate;
 
 import com.discovervancouver.dto.WeatherResponse;
 import com.discovervancouver.model.OpeningPeriod;
 import com.discovervancouver.model.Place;
 import com.discovervancouver.repository.PlaceRepository;
 import com.discovervancouver.service.WeatherService;
+import com.discovervancouver.support.TestDatabaseGuard;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -38,11 +40,15 @@ class RecommendationApiIntegrationTest {
     @Autowired
     private PlaceRepository placeRepository;
 
+    @Autowired
+    private MongoTemplate mongoTemplate;
+
     @MockitoBean
     private WeatherService weatherService;
 
     @BeforeEach
     void loadKnownPlaces() {
+        TestDatabaseGuard.requireIsolatedDatabase(mongoTemplate);
         placeRepository.deleteAll();
         placeRepository.saveAll(List.of(
             place("near", "Near Test Cafe", 49.2828, -123.1207),
@@ -56,6 +62,7 @@ class RecommendationApiIntegrationTest {
 
     @AfterEach
     void cleanDatabase() {
+        TestDatabaseGuard.requireIsolatedDatabase(mongoTemplate);
         placeRepository.deleteAll();
     }
 
