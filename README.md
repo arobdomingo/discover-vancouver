@@ -85,6 +85,9 @@ documented in [the operations guide](docs/production-operations.md). Test
 layers, the executable end-to-end check and release automation are documented
 in [the testing guide](docs/testing.md).
 
+Recommendation quality can be measured with the 150-query evaluator described
+in [the recommendation evaluation guide](docs/recommendation-evaluation.md).
+
 ## Roadmap
 Provision managed MongoDB and HTTPS hosting, then begin a closed beta with
 production monitoring and tester interviews.

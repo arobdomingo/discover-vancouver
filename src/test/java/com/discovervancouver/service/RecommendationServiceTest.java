@@ -445,7 +445,7 @@ public class RecommendationServiceTest {
             20,
             "free",
             null,
-            true,
+            false,
             10
         ).get(0);
 
@@ -456,6 +456,80 @@ public class RecommendationServiceTest {
             .anyMatch(reason -> reason.contains("budget preference")));
         assertEquals(false, result.reasons().stream()
             .anyMatch(reason -> reason.contains("indoor option")));
+    }
+
+    @Test
+    void selectedCategoryIsAnEligibilityRule() {
+        PlaceService placeService = mock(PlaceService.class);
+        WeatherService weatherService = mock(WeatherService.class);
+        Place cafe = testPlace("cafe", "Cafe", List.of("cafe"));
+        Place library = new Place(
+            "library", "Library", "study", "Quiet library.", "Vancouver, BC",
+            0, true, alwaysOpenHours(), 49.2827, -123.1207,
+            List.of("study", "quiet")
+        );
+        when(placeService.getPlacesNear(49.2827, -123.1207, 1_600))
+            .thenReturn(List.of(library, cafe));
+        when(weatherService.getCurrentWeatherResponse(49.2827, -123.1207))
+            .thenReturn(new WeatherResponse(12.0, 0.0, 3, false));
+
+        List<RecommendationResponse> results = new RecommendationService(
+            placeService, new DistanceService(), weatherService,
+            openingHoursService, timeOfDayService, properties
+        ).getRecommendations(
+            49.2827, -123.1207, "cafe", null, 20, null, "quiet"
+        );
+
+        assertEquals(List.of("cafe"), results.stream()
+            .map(RecommendationResponse::placeId).toList());
+    }
+
+    @Test
+    void foodAliasSelectsRestaurants() {
+        PlaceService placeService = mock(PlaceService.class);
+        WeatherService weatherService = mock(WeatherService.class);
+        Place restaurant = new Place(
+            "restaurant", "Restaurant", "restaurant", "Food.", "Vancouver, BC",
+            1, true, alwaysOpenHours(), 49.2827, -123.1207,
+            List.of("restaurant")
+        );
+        when(placeService.getPlacesNear(49.2827, -123.1207, 1_600))
+            .thenReturn(List.of(restaurant));
+        when(weatherService.getCurrentWeatherResponse(49.2827, -123.1207))
+            .thenReturn(new WeatherResponse(12.0, 0.0, 3, false));
+
+        List<RecommendationResponse> results = new RecommendationService(
+            placeService, new DistanceService(), weatherService,
+            openingHoursService, timeOfDayService, properties
+        ).getRecommendations(
+            49.2827, -123.1207, "food", null, 20, null, null
+        );
+
+        assertEquals("restaurant", results.getFirst().category());
+    }
+
+    @Test
+    void openOnlyExcludesPlacesWithUnknownHours() {
+        PlaceService placeService = mock(PlaceService.class);
+        WeatherService weatherService = mock(WeatherService.class);
+        OpeningHoursService hoursService = mock(OpeningHoursService.class);
+        Place unknown = new Place(
+            "unknown", "Unknown Hours", "cafe", "Cafe.", "Vancouver, BC",
+            1, true, Map.of(), 49.2827, -123.1207, List.of("cafe")
+        );
+        when(placeService.getPlacesNear(49.2827, -123.1207, 1_600))
+            .thenReturn(List.of(unknown));
+        when(weatherService.getCurrentWeatherResponse(49.2827, -123.1207))
+            .thenReturn(new WeatherResponse(12.0, 0.0, 3, false));
+
+        List<RecommendationResponse> results = new RecommendationService(
+            placeService, new DistanceService(), weatherService,
+            hoursService, timeOfDayService, properties
+        ).getRecommendations(
+            49.2827, -123.1207, "cafe", null, 20, null, null, true, 10
+        );
+
+        assertTrue(results.isEmpty());
     }
 
     @Test

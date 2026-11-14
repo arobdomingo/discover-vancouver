@@ -41,6 +41,8 @@ public class RecommendationProperties {
         private int rainyDayTag = 10;
         private int timeOfDay = 8;
         private int distanceMaximum = 20;
+        private int dataQuality = 8;
+        private int completeness = 6;
 
         public int getCategory() { return category; }
         public void setCategory(int category) { this.category = category; }
@@ -60,5 +62,9 @@ public class RecommendationProperties {
         public void setTimeOfDay(int timeOfDay) { this.timeOfDay = timeOfDay; }
         public int getDistanceMaximum() { return distanceMaximum; }
         public void setDistanceMaximum(int distanceMaximum) { this.distanceMaximum = distanceMaximum; }
+        public int getDataQuality() { return dataQuality; }
+        public void setDataQuality(int dataQuality) { this.dataQuality = dataQuality; }
+        public int getCompleteness() { return completeness; }
+        public void setCompleteness(int completeness) { this.completeness = completeness; }
     }
 }

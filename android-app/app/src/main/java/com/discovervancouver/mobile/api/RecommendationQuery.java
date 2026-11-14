@@ -23,7 +23,7 @@ public record RecommendationQuery(
         Map<String, String> parameters = new LinkedHashMap<>();
         parameters.put("lat", Double.toString(latitude));
         parameters.put("lng", Double.toString(longitude));
-        putWhenPresent(parameters, "category", category);
+        putWhenPresent(parameters, "category", apiCategory(category));
         if (indoorPreferred != null) {
             parameters.put(
                 "indoorPreferred",
@@ -56,6 +56,14 @@ public record RecommendationQuery(
         if (value != null && !value.isBlank()) {
             parameters.put(name, value);
         }
+    }
+
+    private static String apiCategory(String category) {
+        if (category == null) return null;
+        return switch (category.trim().toLowerCase(java.util.Locale.ROOT)) {
+            case "food" -> "restaurant";
+            default -> category.trim().toLowerCase(java.util.Locale.ROOT);
+        };
     }
 
     private static String encode(String value) {

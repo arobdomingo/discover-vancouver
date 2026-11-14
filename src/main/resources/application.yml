@@ -27,6 +27,8 @@ app:
       rainy-day-tag: ${RECOMMENDATION_WEIGHT_RAINY_DAY_TAG:10}
       time-of-day: ${RECOMMENDATION_WEIGHT_TIME_OF_DAY:8}
       distance-maximum: ${RECOMMENDATION_WEIGHT_DISTANCE_MAXIMUM:20}
+      data-quality: ${RECOMMENDATION_WEIGHT_DATA_QUALITY:8}
+      completeness: ${RECOMMENDATION_WEIGHT_COMPLETENESS:6}
   rate-limit:
     requests-per-minute: ${RATE_LIMIT_REQUESTS_PER_MINUTE:120}
   import:

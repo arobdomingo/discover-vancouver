@@ -52,4 +52,22 @@ public class RecommendationQueryTest {
         assertFalse(result.contains("budgetPreference="));
         assertFalse(result.contains("atmosphere="));
     }
+
+    @Test
+    public void foodUiCategoryUsesRestaurantApiCategory() {
+        RecommendationQuery query = new RecommendationQuery(
+            49.2827,
+            -123.1207,
+            "Food",
+            null,
+            20,
+            null,
+            null,
+            false,
+            10
+        );
+
+        assertTrue(query.toQueryString().contains("category=restaurant"));
+        assertFalse(query.toQueryString().contains("category=food"));
+    }
 }
