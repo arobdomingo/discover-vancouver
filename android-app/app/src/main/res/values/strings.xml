@@ -13,6 +13,15 @@
     <string name="discover_places">Discover places</string>
     <string name="preferences">What are you looking for?</string>
     <string name="results">Recommended for you</string>
+    <string name="view_results_on_map">View results on map</string>
+    <string name="recommendation_map_title">Recommendation map</string>
+    <string name="recommendation_map_hint">Markers are numbered by recommendation rank. Tap one for a preview.</string>
+    <string name="map_no_results">There are no mappable recommendations.</string>
+    <string name="view_place_details">View place details</string>
+    <string name="map_preview_meta">#%1$d · %2$s · %3$d min walk · %4$s</string>
+    <string name="hours_open_now">Open now</string>
+    <string name="hours_closed_now">Closed now</string>
+    <string name="hours_unavailable">Hours unavailable</string>
     <string name="no_results">No matching places yet. Try a longer walk or fewer filters.</string>
     <string name="category_hint">Category</string>
     <string name="atmosphere_hint">Atmosphere, e.g. quiet</string>

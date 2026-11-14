@@ -2,6 +2,7 @@ package com.discovervancouver.mobile.ui;
 
 import android.Manifest;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
@@ -31,6 +32,7 @@ import com.discovervancouver.mobile.R;
 import com.discovervancouver.mobile.api.RecommendationQuery;
 import com.discovervancouver.mobile.data.DiscoveryPreferences;
 import com.discovervancouver.mobile.data.PreferencesStore;
+import com.discovervancouver.mobile.model.Recommendation;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.materialswitch.MaterialSwitch;
 import com.google.android.material.textfield.TextInputEditText;
@@ -57,6 +59,8 @@ public final class MainActivity extends AppCompatActivity {
     private TextView messageView;
     private ProgressBar progressBar;
     private MaterialButton discoverButton;
+    private MaterialButton mapButton;
+    private List<Recommendation> mapRecommendations = List.of();
 
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
     private CancellationSignal locationCancellationSignal;
@@ -124,6 +128,7 @@ public final class MainActivity extends AppCompatActivity {
         messageView = findViewById(R.id.messageView);
         progressBar = findViewById(R.id.progressBar);
         discoverButton = findViewById(R.id.discoverButton);
+        mapButton = findViewById(R.id.mapButton);
 
         RecyclerView resultsList = findViewById(R.id.resultsList);
         adapter = new RecommendationAdapter(preferencesStore);
@@ -174,6 +179,7 @@ public final class MainActivity extends AppCompatActivity {
             view -> requestLocation()
         );
         discoverButton.setOnClickListener(view -> onDiscoverClicked());
+        mapButton.setOnClickListener(view -> openRecommendationMap());
     }
 
     private void setSpinnerValues(Spinner spinner, List<String> values) {
@@ -417,6 +423,7 @@ public final class MainActivity extends AppCompatActivity {
             case SUCCESS -> {
                 setLoading(false);
                 adapter.submitList(state.recommendations());
+                mapRecommendations = state.recommendations();
                 boolean empty = state.recommendations().isEmpty();
                 resultsHeading.setVisibility(
                     empty ? View.GONE : View.VISIBLE
@@ -425,10 +432,15 @@ public final class MainActivity extends AppCompatActivity {
                 messageView.setVisibility(
                     empty ? View.VISIBLE : View.GONE
                 );
+                mapButton.setVisibility(
+                    empty ? View.GONE : View.VISIBLE
+                );
             }
             case ERROR -> {
                 setLoading(false);
                 adapter.submitList(List.of());
+                mapRecommendations = List.of();
+                mapButton.setVisibility(View.GONE);
                 resultsHeading.setVisibility(View.GONE);
                 messageView.setText(getString(
                     R.string.recommendations_error,
@@ -471,7 +483,19 @@ public final class MainActivity extends AppCompatActivity {
         discoverButton.setEnabled(!loading);
         if (loading) {
             messageView.setVisibility(View.GONE);
+            mapButton.setVisibility(View.GONE);
         }
+    }
+
+    private void openRecommendationMap() {
+        if (mapRecommendations.isEmpty()) {
+            return;
+        }
+        Intent intent = RecommendationMapActivity.createIntent(
+            this,
+            mapRecommendations
+        );
+        startActivity(intent);
     }
 
     @Override

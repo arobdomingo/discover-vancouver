@@ -11,6 +11,8 @@ repository root.
   permission-denied, and downtown Vancouver fallback paths.
 - An HTTP client that calls `GET /api/recommendations` and parses its JSON.
 - Ranked recommendation cards with loading, empty, and error states.
+- A full-screen interactive MapLibre map with ranked, category-colored markers,
+  automatic result bounds, place previews, and navigation to place details.
 - A details screen showing the address, tags, and every recommendation reason.
 - Persisted filters and favourite place IDs.
 - Walking directions through the user's available maps or browser app.
@@ -40,6 +42,10 @@ The debug build uses `http://10.0.2.2:8080/`. Android emulators reserve
 phone instead needs the Mac's LAN IP in the debug `API_BASE_URL` inside
 `app/build.gradle`.
 
+Map tiles use OpenFreeMap's OpenStreetMap-derived Liberty style during
+development. Set `DISCOVER_VANCOUVER_MAP_STYLE_URL` before a release build to
+use a different production tile provider or a self-hosted style.
+
 ## Code tour
 
 - `MainActivity` coordinates the form, runtime permissions, and fresh location
@@ -52,6 +58,8 @@ phone instead needs the Mac's LAN IP in the debug `API_BASE_URL` inside
 - `RecommendationApiClient` performs network work off the main thread.
 - `Recommendation` translates each JSON object into a Java object.
 - `RecommendationAdapter` binds those objects to scrolling result cards.
+- `RecommendationMapActivity` displays the same results as interactive map
+  markers without making another backend request.
 - `PlaceDetailActivity` displays the selected result without another request.
 - `FeedbackReporter` sends anonymous product events away from the UI thread.
 
